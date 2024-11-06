@@ -12,6 +12,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10" />
+    <PackageReference Include="Microsoft.VisualStudio.LiveShare" Version="1.1.57" />
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="8.0.8" />
   </ItemGroup>
 
 </Project>
