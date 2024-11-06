@@ -1,0 +1,46 @@
+﻿# Archivos de configuración de entorno
+.env
+.env.*
+
+# Archivos de configuración de Visual Studio
+.vscode/
+.vscode/*
+
+# Dependencias
+node_modules/
+bin/
+obj/
+
+# Archivos generados por el compilador y temporales
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+*.csproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.pidb
+*.mdb
+*.opendb
+*.vsidx
+
+# Archivos de la carpeta de publicación
+wwwroot/dist/
+wwwroot/css/
+wwwroot/js/
+
+# Archivos específicos de macOS y Linux
+.DS_Store
+Thumbs.db
+
+# Archivos de configuración de Rider y JetBrains
+.idea/
+*.sln.iml
+
+/EqualityGame/.vs/EqualityGame/FileContentIndex
+/EqualityGame/.vs/EqualityGame/v17/.suo
+/EqualityGame/.vs/EqualityGame/v17/DocumentLayout.backup.json
+/EqualityGame/.vs/EqualityGame/v17/DocumentLayout.json
