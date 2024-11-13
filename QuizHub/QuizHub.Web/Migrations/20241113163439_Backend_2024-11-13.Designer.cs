@@ -11,8 +11,8 @@ using QuizHub.Web.Data;
 namespace QuizHub.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241106164420_Pregunta")]
-    partial class Pregunta
+    [Migration("20241113163439_Backend_2024-11-13")]
+    partial class Backend_20241113
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -214,15 +214,74 @@ namespace QuizHub.Web.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("QuizHub.Web.Data.Asignatura", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("asignaturas");
+                });
+
+            modelBuilder.Entity("QuizHub.Web.Data.AsinaturasUsuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdAsignatura")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("asignaturasUsuario");
+                });
+
+            modelBuilder.Entity("QuizHub.Web.Data.Cuestionario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Asignatura")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdPregutasCuestionario")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("cuestionarios");
+                });
+
             modelBuilder.Entity("QuizHub.Web.Data.Pregunta", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -231,6 +290,47 @@ namespace QuizHub.Web.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("preguntas");
+                });
+
+            modelBuilder.Entity("QuizHub.Web.Data.PreguntasCuestionario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdCuestionario")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdPregunta")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("preguntasCuestionario");
+                });
+
+            modelBuilder.Entity("QuizHub.Web.Data.Respuesta", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Correcta")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IdPregunta")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Texto")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("respuestas");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
