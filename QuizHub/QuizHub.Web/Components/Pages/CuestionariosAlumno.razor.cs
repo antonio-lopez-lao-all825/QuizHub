@@ -11,13 +11,12 @@ namespace QuizHub.Web.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             //Llamada a la BD
-            //cuestionarios = await DbContext.Cuestionarios.ToListAsync();
+            cuestionarios = await DbContext.cuestionarios.ToListAsync();
 
             // Simulación de datos.
-            cuestionarios = await ObtenerCuestionarios();
+           // cuestionarios = await ObtenerCuestionarios();
         }
-
-
+        /*
         private Task<List<Cuestionario>> ObtenerCuestionarios()
         {
             // Simulacion de datos para la vista
@@ -27,7 +26,8 @@ namespace QuizHub.Web.Components.Pages
             new Cuestionario { Id = 2, Name = "Cuestionario 2", Asignatura = "Historia", Estado = 0 },
             new Cuestionario { Id = 3, Name = "Cuestionario 3", Asignatura = "Ciencias", Estado = 1 }
         });
-        }
+        }*/
+
         private void NavegarACuestionario(int id)
         {
             NavigationManager.NavigateTo($"/detalleCuestionario/{id}");
