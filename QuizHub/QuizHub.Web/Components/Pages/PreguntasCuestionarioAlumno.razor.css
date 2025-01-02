@@ -1,0 +1,27 @@
+﻿.pregunta-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.boton-enviar {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+    .boton-enviar:hover {
+        background-color: #45a049;
+    }
+
+.resultado {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
