@@ -1,0 +1,45 @@
+﻿@page "/detalleCuestionario/{id:int}"
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext DbContext
+@using Microsoft.EntityFrameworkCore
+
+<h3>Detalle Cuestionario</h3>
+
+@if (preguntas != null && respuestas != null)
+{
+    <EditForm Model="@respuestasUsuario" OnValidSubmit="@CalcularPuntuacion">
+        @foreach (var pregunta in preguntas)
+        {
+            <div class="pregunta-container">
+                <h4>@pregunta.Name</h4>
+                <div>
+                    @foreach (var respuesta in respuestas.Where(r => r.IdPregunta == pregunta.Id))
+                    {
+                        <label>
+                            <input type="radio" name="respuesta-@pregunta.Id" value="@respuesta.Id" @onchange="() => SeleccionarRespuesta(pregunta.Id, respuesta.Id.Value)" />
+                            @respuesta.Texto
+                        </label>
+                        <br />
+                    }
+                </div>
+            </div>
+        }
+
+        <button type="submit" class="boton-enviar">Calcular Puntuación</button>
+    </EditForm>
+
+    @if (puntuacionFinal.HasValue)
+    {
+        <div class="resultado">
+            <h4>Tu puntuación: @puntuacionFinal/10</h4>
+        </div>
+    }
+}
+else
+{
+    <p>Cargando preguntas...</p>
+}
+
+@code {
+ 
+}
