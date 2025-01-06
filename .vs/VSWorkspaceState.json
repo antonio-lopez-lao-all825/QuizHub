@@ -1,6 +1,12 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\QuizHub",
+    "\\QuizHub\\QuizHub.Web",
+    "\\QuizHub\\QuizHub.Web\\Components",
+    "\\QuizHub\\QuizHub.Web\\Components\\Layout",
+    "\\QuizHub\\QuizHub.Web\\Components\\Pages"
   ],
+  "SelectedNode": "\\QuizHub\\QuizHub.sln",
   "PreviewInSolutionExplorer": false
 }

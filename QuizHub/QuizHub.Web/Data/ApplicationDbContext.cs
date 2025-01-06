@@ -12,5 +12,6 @@ namespace QuizHub.Web.Data
         public DbSet<Asignatura> asignaturas { get; set; }
         public DbSet<AsinaturasUsuario> asignaturasUsuario { get; set; }
         public DbSet<Puntuacion> puntuacion { get; set; }
+
     }
 }
