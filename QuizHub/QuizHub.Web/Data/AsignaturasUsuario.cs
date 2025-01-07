@@ -1,9 +1,9 @@
 ﻿namespace QuizHub.Web.Data
 {
-    public class AsinaturasUsuario
+    public class AsignaturasUsuario
     {
         public int Id { get; set; }
         public int IdAsignatura { get; set; }
-        public int IdUsuario { get; set; }
+        public string IdUsuario { get; set; }
     }
 }

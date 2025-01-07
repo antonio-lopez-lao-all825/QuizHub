@@ -5,11 +5,11 @@
 @inject UserManager<ApplicationUser> UserManager
 @using Microsoft.EntityFrameworkCore
 
-<PageTitle>Administrar Usuarios</PageTitle>
+<PageTitle>Administrar Alumnos</PageTitle>
 
 <div class="row">
     <div class="col-10">
-        <h1>Administrar Usuarios</h1>
+        <h1>Administrar Alumnos</h1>
     </div>
 </div>
 
@@ -17,14 +17,16 @@
 {
     <p><em>Cargando...</em></p>
 }
+else if (!usuarios.Any())
+{
+    <p>No se encontraron alumnos.</p>
+}
 else
 {
     <table class="table mt-4">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Nombre de Usuario</th>
-                <th>Email</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -32,9 +34,7 @@ else
             @foreach (var usuario in usuarios)
             {
                 <tr>
-                    <td>@usuario.Id</td>
                     <td>@usuario.UserName</td>
-                    <td>@usuario.Email</td>
                     <td>
                         <button class="btn btn-warning btn-sm" @onclick="() => AbrirModalEdicion(usuario)">Editar</button>
                         <button class="btn btn-danger btn-sm" @onclick="() => EliminarUsuario(usuario.Id)">Eliminar</button>
@@ -45,7 +45,6 @@ else
     </table>
 }
 
-<!-- Sección para editar un usuario -->
 <div class="modal fade" id="editUsuarioModal" tabindex="-1" aria-labelledby="editUsuarioModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -75,7 +74,6 @@ else
     private List<ApplicationUser> usuarios = new();
     private ApplicationUser usuarioEditado = new();
 
-    // Inicializar usuarios
     protected override async Task OnInitializedAsync()
     {
         // Obtener todos los usuarios
@@ -85,7 +83,6 @@ else
         var usuariosAlumnos = new List<ApplicationUser>();
         foreach (var usuario in todosUsuarios)
         {
-            
             var roles = await UserManager.GetRolesAsync(usuario);
 
             // Filtrar solo los usuarios con el rol "alumno"
@@ -95,11 +92,9 @@ else
             }
         }
 
-        // Asignar la lista filtrada
         usuarios = usuariosAlumnos;
     }
 
-    // Eliminar un usuario
     private async Task EliminarUsuario(string id)
     {
         var usuario = await UserManager.FindByIdAsync(id);
@@ -128,7 +123,6 @@ else
         }
     }
 
-    // Abrir sección de edición
     private void AbrirModalEdicion(ApplicationUser usuario)
     {
         usuarioEditado = new ApplicationUser
@@ -139,11 +133,9 @@ else
             };
         StateHasChanged();
 
-        // Mostrar la sección de edición
         JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('editUsuarioModal')).show();");
     }
 
-    // Actualizar usuario
     private async Task ActualizarUsuario()
     {
         var usuarioExistente = await UserManager.FindByIdAsync(usuarioEditado.Id);
@@ -174,7 +166,6 @@ else
                 usuarioEditado = new();
                 StateHasChanged();
 
-                // Cerrar la sección de editar usando JavaScript
                 await JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('editUsuarioModal')).hide();");
             }
         }
