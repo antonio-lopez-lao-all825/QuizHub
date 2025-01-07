@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\mavil\\QuizHub\\QuizHub\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\mavil\\quizhub\\quizhub\\quizhub.web\\components\\layout\\navmenu.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\layout\\navmenu.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\mavil\\quizhub\\quizhub\\quizhub.web\\components\\pages\\manejarasignaturas.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\pages\\manejarasignaturas.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\mavil\\quizhub\\quizhub\\quizhub.web\\components\\pages\\manejaralumnos.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\pages\\manejaralumnos.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\mavil\\quizhub\\quizhub\\quizhub.web\\components\\layout\\mainlayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\layout\\mainlayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\mavil\\quizhub\\quizhub\\quizhub.web\\components\\account\\pages\\register.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -22,8 +22,34 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ManejarAsignaturas.razor",
+              "DocumentMoniker": "C:\\Users\\mavil\\QuizHub\\QuizHub\\QuizHub.Web\\Components\\Pages\\ManejarAsignaturas.razor",
+              "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\ManejarAsignaturas.razor",
+              "ToolTip": "C:\\Users\\mavil\\QuizHub\\QuizHub\\QuizHub.Web\\Components\\Pages\\ManejarAsignaturas.razor",
+              "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\ManejarAsignaturas.razor",
+              "ViewState": "AgIAALkAAAAAAAAAAADwv9cAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-01-07T18:00:04.525Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainLayout.razor",
+              "DocumentMoniker": "C:\\Users\\mavil\\QuizHub\\QuizHub\\QuizHub.Web\\Components\\Layout\\MainLayout.razor",
+              "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Layout\\MainLayout.razor",
+              "ToolTip": "C:\\Users\\mavil\\QuizHub\\QuizHub\\QuizHub.Web\\Components\\Layout\\MainLayout.razor",
+              "RelativeToolTip": "QuizHub.Web\\Components\\Layout\\MainLayout.razor",
+              "ViewState": "AgIAACgAAAAAAAAAAADwv0YAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-01-07T16:26:53.804Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
@@ -47,32 +73,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAK0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-01-06T15:47:05.887Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ManejarAlumnos.razor",
-              "DocumentMoniker": "C:\\Users\\mavil\\QuizHub\\QuizHub\\QuizHub.Web\\Components\\Pages\\ManejarAlumnos.razor",
-              "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\ManejarAlumnos.razor",
-              "ToolTip": "C:\\Users\\mavil\\QuizHub\\QuizHub\\QuizHub.Web\\Components\\Pages\\ManejarAlumnos.razor",
-              "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\ManejarAlumnos.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAALAAAAAuAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-01-06T13:01:19.034Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "NavMenu.razor",
-              "DocumentMoniker": "C:\\Users\\mavil\\QuizHub\\QuizHub\\QuizHub.Web\\Components\\Layout\\NavMenu.razor",
-              "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Layout\\NavMenu.razor",
-              "ToolTip": "C:\\Users\\mavil\\QuizHub\\QuizHub\\QuizHub.Web\\Components\\Layout\\NavMenu.razor",
-              "RelativeToolTip": "QuizHub.Web\\Components\\Layout\\NavMenu.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGUAAAAvAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-01-06T13:01:44.644Z",
               "EditorCaption": ""
             }
           ]

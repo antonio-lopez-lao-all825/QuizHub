@@ -1,7 +1,10 @@
 ﻿@page "/preguntas"
 
 @using QuizHub.Web.Data
+@using Microsoft.AspNetCore.Identity
 @inject ApplicationDbContext db
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Preguntas</PageTitle>
 
@@ -21,28 +24,32 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <EditForm Model="pregunta" OnValidSubmit="añadirPregunta">
+                        <EditForm Model="pregunta" OnValidSubmit="AñadirPregunta">
+                            <DataAnnotationsValidator />
                             <label>Número de Respuestas:</label>
-                            <input @bind="_numeroRespuestas" type="number" class="form-control mb-3" required @oninput="ActualizarRespuestas"></input>
+                            <InputNumber @bind-Value="_numeroRespuestas" class="form-control mb-3" @oninput="ActualizarRespuestas" />
+
                             <label>Pregunta:</label>
-                            <InputText @bind-Value="pregunta.Name" class="form-control mb-3" required></InputText>
-                            @if (respuestas != null && respuestas.Count > 0)
+                            <InputText @bind-Value="pregunta.Name" class="form-control mb-3" required />
+
+                            @if (respuestas.Count > 0)
                             {
-                                @for (int i = 0; i < respuestas.Count; i++)
+                                @foreach (var (respuesta, index) in respuestas.Select((r, i) => (r, i)))
                                 {
-                                    if (i == 0)
-                                    {
-                                        <label>Respuesta @(i + 1) (correcta):</label>
-                                    }
-                                    else
-                                    {
-                                        <label>Respuesta @(i + 1):</label>
-                                    }
-                                    <InputText @bind-Value="respuestas[i].Texto" class="form-control mb-3" required></InputText>
+                                    <label>Respuesta @(index + 1):</label>
+                                    <InputText @bind-Value="respuesta.Texto" class="form-control mb-1" required />
+
+                                    <div class="form-check mb-3">
+                                        <InputRadioGroup @bind-Value="selectedRespuestaCorrecta">
+                                            <InputRadio class="form-check-input" Value="@index" />
+                                            <label class="form-check-label">Es correcta</label>
+                                        </InputRadioGroup>
+                                    </div>
                                 }
                             }
+
                             <div class="text-center">
-                                <button type="submit" class="btn btn-primary text-center px-10" data-bs-dismiss="modal">Añadir</button>
+                                <button type="submit" class="btn btn-primary">Añadir</button>
                             </div>
                         </EditForm>
                     </div>
@@ -54,16 +61,18 @@
 
 @if (preguntas == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Cargando...</em></p>
+}
+else if (!preguntas.Any())
+{
+    <p>No se encontraron preguntas.</p>
 }
 else
 {
     <table class="table">
         <thead>
             <tr>
-                <th>Id</th>
                 <th>Pregunta</th>
-                <th>Estado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -71,32 +80,63 @@ else
             @foreach (var p in preguntas)
             {
                 <tr>
-                    <td>@p.Id</td>
                     <td>@p.Name</td>
-                    <td>@p.Estado</td>
-                    <td></td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" @onclick="() => AbrirRespuestas(p.Id)">Abrir</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarPregunta(p.Id)">Eliminar</button>
+                    </td>
                 </tr>
+                @if (respuestasPorPregunta.ContainsKey(p.Id))
+                {
+                    <tr>
+                        <td colspan="3">
+                            <ul>
+                                @foreach (var respuesta in respuestasPorPregunta[p.Id])
+                                {
+                                    <li>@respuesta.Texto (@(respuesta.Correcta == true ? "Correcta" : "Incorrecta"))</li>
+                                }
+                            </ul>
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
     </table>
 }
 
 @code {
-    private Pregunta[]? preguntas;
+    private List<Pregunta> preguntas = new();
+    private Pregunta pregunta = new Pregunta
+        {
+            Name = "",
+            Estado = 1
+        };
+
+    private string _userId = string.Empty;
+    private int _numeroRespuestas = 0;
+    private List<Respuesta> respuestas = new();
+
+    private Dictionary<int, List<Respuesta>> respuestasPorPregunta = new();
+    private int? selectedRespuestaCorrecta = 0;
 
     protected override async Task OnInitializedAsync()
     {
-        preguntas = db.preguntas.ToArray();
-    }
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
 
-    private Pregunta pregunta = new()
+        if (user.Identity != null && user.Identity.IsAuthenticated)
         {
-            Name = "",
-            Estado = 1,
-        };
+            var currentUser = await UserManager.GetUserAsync(user);
+            if (currentUser != null)
+            {
+                _userId = currentUser.Id;
 
-    private int _numeroRespuestas = 0;
-    private List<Respuesta> respuestas = new();
+                preguntas = await db.preguntas
+                    .Where(p => p.UserId == _userId)
+                    .ToListAsync();
+            }
+        }
+    }
 
     private void ActualizarRespuestas(ChangeEventArgs e)
     {
@@ -121,22 +161,73 @@ else
         }
     }
 
-    protected async Task añadirPregunta()
+    private async Task AñadirPregunta()
     {
-        db.preguntas.Add(pregunta);
-        await db.SaveChangesAsync();
-
-        foreach (var (respuesta, index) in respuestas.Select((r, i) => (r, i)))
+        if (!string.IsNullOrEmpty(_userId))
         {
-            respuesta.IdPregunta = pregunta.Id;
-            respuesta.Correcta = index == 0;
+            pregunta.UserId = _userId;
+
+            db.preguntas.Add(pregunta);
+            await db.SaveChangesAsync();
+
+            // Establecer la respuesta correcta seleccionada por el profesor
+            if (selectedRespuestaCorrecta.HasValue && selectedRespuestaCorrecta.Value >= 0 && selectedRespuestaCorrecta.Value < respuestas.Count)
+            {
+                respuestas[selectedRespuestaCorrecta.Value].Correcta = true;
+            }
+
+            foreach (var r in respuestas)
+            {
+                r.IdPregunta = pregunta.Id;
+            }
+
+            db.respuestas.AddRange(respuestas);
+            await db.SaveChangesAsync();
+
+            pregunta = new Pregunta { Name = "", Estado = 1 };
+            respuestas.Clear();
+            _numeroRespuestas = 0;
+            selectedRespuestaCorrecta = 0;
+
+            preguntas = await db.preguntas
+                .Where(p => p.UserId == _userId)
+                .ToListAsync();
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task AbrirRespuestas(int preguntaId)
+    {
+        if (!respuestasPorPregunta.ContainsKey(preguntaId))
+        {
+            var respuestas = await db.respuestas
+                .Where(r => r.IdPregunta == preguntaId)
+                .ToListAsync();
+            respuestasPorPregunta[preguntaId] = respuestas;
+        }
+        else
+        {
+            respuestasPorPregunta.Remove(preguntaId);
         }
 
-        db.respuestas.AddRange(respuestas);
-        await db.SaveChangesAsync();
+        StateHasChanged();
+    }
 
-        pregunta = new();
-        respuestas.Clear();
-        _numeroRespuestas = 0;
+    private async Task EliminarPregunta(int preguntaId)
+    {
+        var pregunta = await db.preguntas.FindAsync(preguntaId);
+        if (pregunta != null)
+        {
+            var respuestasToRemove = db.respuestas.Where(r => r.IdPregunta == preguntaId);
+            db.respuestas.RemoveRange(respuestasToRemove);
+
+            db.preguntas.Remove(pregunta);
+            await db.SaveChangesAsync();
+
+            preguntas.RemoveAll(p => p.Id == preguntaId);
+            respuestasPorPregunta.Remove(preguntaId);
+            StateHasChanged();
+        }
     }
 }
