@@ -1,0 +1,27 @@
+﻿@page "/preguntasAlumno"
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext DbContext
+
+<h3>Cuestionarios Disponibles</h3>
+
+<div class="cuestionarios-container">
+    @if (cuestionarios != null && cuestionarios.Any())
+    {
+        foreach (var cuestionario in cuestionarios)
+        {
+            <div class="cuestionario-card" @onclick="() => NavegarACuestionario(cuestionario.Id)">
+                <h4>@cuestionario.Name</h4>
+                <p><strong>Asignatura:</strong> @cuestionario.Asignatura</p>
+                <p><strong>Estado:</strong> @(cuestionario.Estado == 1 ? "Activo" : "Inactivo")</p>
+            </div>
+        }
+    }
+    else
+    {
+        <p>No hay cuestionarios disponibles.</p>
+    }
+</div>
+
+@code {
+   
+}

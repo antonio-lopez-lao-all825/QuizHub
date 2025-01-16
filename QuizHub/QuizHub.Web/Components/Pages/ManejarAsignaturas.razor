@@ -1,0 +1,215 @@
+﻿@page "/Asignaturas"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@inject ApplicationDbContext db
+@inject IJSRuntime JSRuntime
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Asignaturas</PageTitle>
+
+<div class="row">
+    <div class="col-10">
+        <h1>Asignaturas</h1>
+    </div>
+    <div class="col-2 text-end">
+        <button class="btn btn-primary" @onclick="() => AbrirModalAgregarAsignatura()">Añadir Asignatura</button>
+    </div>
+</div>
+
+@if (asignaturas == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (!asignaturas.Any())
+{
+    <p>No se encontraron asignaturas.</p>
+}
+else
+{
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th>Nombre Asignatura</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var asignatura in asignaturas)
+            {
+                <tr>
+                    <td>@asignatura.Name</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm me-1" @onclick="() => AbrirModalEditarAsignatura(asignatura)">Editar</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarAsignatura(asignatura.Id)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Modal para agregar una asignatura -->
+<div class="modal fade" id="agregarAsignaturaModal" tabindex="-1" aria-labelledby="agregarAsignaturaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="agregarAsignaturaModalLabel">Añadir Asignatura</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="asignaturaName">Nombre de la Asignatura:</label>
+                <InputText id="asignaturaName" @bind-Value="nombreAsignatura" class="form-control" required />
+                <button class="btn btn-primary w-100 mt-3" @onclick="() => AgregarAsignatura()">Añadir Asignatura</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar una asignatura -->
+<div class="modal fade" id="editarAsignaturaModal" tabindex="-1" aria-labelledby="editarAsignaturaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editarAsignaturaModalLabel">Editar Asignatura</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="editarAsignaturaName">Nuevo Nombre de la Asignatura:</label>
+                <InputText id="editarAsignaturaName" @bind-Value="nombreAsignatura" class="form-control" required />
+                <button class="btn btn-warning w-100 mt-3" @onclick="() => EditarAsignatura()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Asignatura> asignaturas = new();
+    private string nombreAsignatura = string.Empty;
+    private Asignatura asignaturaAEditar;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            Console.WriteLine("Usuario no autenticado.");
+            return;
+        }
+
+        var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            Console.WriteLine("No se encontró el ID del usuario.");
+            return;
+        }
+
+        asignaturas = await db.asignaturas
+            .Where(a => db.asignaturasUsuario.Any(au => au.IdAsignatura == a.Id && au.IdUsuario == userId))
+            .ToListAsync();
+    }
+
+    private void AbrirModalAgregarAsignatura()
+    {
+        nombreAsignatura = string.Empty;
+        JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('agregarAsignaturaModal')).show();");
+    }
+
+    private async Task AgregarAsignatura()
+    {
+        if (!string.IsNullOrEmpty(nombreAsignatura))
+        {
+            try
+            {
+                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+
+                if (!user.Identity.IsAuthenticated)
+                {
+                    Console.WriteLine("Usuario no autenticado.");
+                    return;
+                }
+
+                var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    Console.WriteLine("No se encontró el ID del usuario.");
+                    return;
+                }
+
+                var nuevaAsignatura = new Asignatura { Name = nombreAsignatura };
+                await db.asignaturas.AddAsync(nuevaAsignatura);
+                await db.SaveChangesAsync();
+
+                var asignaturaUsuario = new AsignaturasUsuario
+                    {
+                        IdAsignatura = nuevaAsignatura.Id,
+                        IdUsuario = userId
+                    };
+
+                await db.asignaturasUsuario.AddAsync(asignaturaUsuario);
+                await db.SaveChangesAsync();
+
+                asignaturas.Add(nuevaAsignatura);
+                StateHasChanged();
+
+                await JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('agregarAsignaturaModal')).hide();");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al agregar asignatura: {ex.Message}");
+            }
+        }
+    }
+
+    private void AbrirModalEditarAsignatura(Asignatura asignatura)
+    {
+        asignaturaAEditar = asignatura;
+        nombreAsignatura = asignatura.Name;
+        JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('editarAsignaturaModal')).show();");
+    }
+
+    private async Task EditarAsignatura()
+    {
+        if (!string.IsNullOrEmpty(nombreAsignatura) && asignaturaAEditar != null)
+        {
+            try
+            {
+                asignaturaAEditar.Name = nombreAsignatura;
+                db.asignaturas.Update(asignaturaAEditar);
+                await db.SaveChangesAsync();
+
+                asignaturas = await db.asignaturas.ToListAsync();
+                StateHasChanged();
+
+                await JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('editarAsignaturaModal')).hide();");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al editar asignatura: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task EliminarAsignatura(int id)
+    {
+        try
+        {
+            var asignatura = await db.asignaturas.FindAsync(id);
+            if (asignatura != null)
+            {
+                db.asignaturas.Remove(asignatura);
+                await db.SaveChangesAsync();
+
+                asignaturas.RemoveAll(a => a.Id == id);
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al eliminar asignatura: {ex.Message}");
+        }
+    }
+}

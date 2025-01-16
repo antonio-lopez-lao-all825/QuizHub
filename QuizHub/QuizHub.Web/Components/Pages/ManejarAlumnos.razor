@@ -1,0 +1,173 @@
+﻿@page "/AdministrarUsuarios"
+@using Microsoft.AspNetCore.Identity
+@inject ApplicationDbContext db
+@inject IJSRuntime JSRuntime
+@inject UserManager<ApplicationUser> UserManager
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Administrar Alumnos</PageTitle>
+
+<div class="row">
+    <div class="col-10">
+        <h1>Administrar Alumnos</h1>
+    </div>
+</div>
+
+@if (usuarios == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (!usuarios.Any())
+{
+    <p>No se encontraron alumnos.</p>
+}
+else
+{
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th>Nombre de Usuario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usuario in usuarios)
+            {
+                <tr>
+                    <td>@usuario.UserName</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" @onclick="() => AbrirModalEdicion(usuario)">Editar</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarUsuario(usuario.Id)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="modal fade" id="editUsuarioModal" tabindex="-1" aria-labelledby="editUsuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editUsuarioModalLabel">Editar Usuario</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="usuarioEditado" OnValidSubmit="ActualizarUsuario">
+                    <DataAnnotationsValidator />
+                    <div class="mb-3">
+                        <label>Nombre de Usuario:</label>
+                        <InputText @bind-Value="usuarioEditado.UserName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label>Email:</label>
+                        <InputText @bind-Value="usuarioEditado.Email" type="email" class="form-control" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Actualizar Usuario</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ApplicationUser> usuarios = new();
+    private ApplicationUser usuarioEditado = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Obtener todos los usuarios
+        var todosUsuarios = await UserManager.Users.AsNoTracking().ToListAsync();
+
+        // Obtener roles de cada usuario
+        var usuariosAlumnos = new List<ApplicationUser>();
+        foreach (var usuario in todosUsuarios)
+        {
+            var roles = await UserManager.GetRolesAsync(usuario);
+
+            // Filtrar solo los usuarios con el rol "alumno"
+            if (roles.Contains("alumno", StringComparer.OrdinalIgnoreCase))
+            {
+                usuariosAlumnos.Add(usuario);
+            }
+        }
+
+        usuarios = usuariosAlumnos;
+    }
+
+    private async Task EliminarUsuario(string id)
+    {
+        var usuario = await UserManager.FindByIdAsync(id);
+        if (usuario != null)
+        {
+            var result = await UserManager.DeleteAsync(usuario);
+            if (result.Succeeded)
+            {
+                // Filtrar los usuarios otra vez después de eliminarlos
+                var usuariosActualizados = await UserManager.Users.AsNoTracking().ToListAsync();
+                var usuariosAlumnos = new List<ApplicationUser>();
+
+                // Obtener roles para cada usuario y filtrar por alumno
+                foreach (var u in usuariosActualizados)
+                {
+                    var roles = await UserManager.GetRolesAsync(u);
+                    if (roles.Contains("alumno", StringComparer.OrdinalIgnoreCase))
+                    {
+                        usuariosAlumnos.Add(u);
+                    }
+                }
+
+                usuarios = usuariosAlumnos;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void AbrirModalEdicion(ApplicationUser usuario)
+    {
+        usuarioEditado = new ApplicationUser
+            {
+                Id = usuario.Id,
+                UserName = usuario.UserName,
+                Email = usuario.Email
+            };
+        StateHasChanged();
+
+        JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('editUsuarioModal')).show();");
+    }
+
+    private async Task ActualizarUsuario()
+    {
+        var usuarioExistente = await UserManager.FindByIdAsync(usuarioEditado.Id);
+        if (usuarioExistente != null)
+        {
+            // Actualizar los datos del usuario
+            usuarioExistente.UserName = usuarioEditado.UserName;
+            usuarioExistente.Email = usuarioEditado.Email;
+
+            var result = await UserManager.UpdateAsync(usuarioExistente);
+            if (result.Succeeded)
+            {
+                // Filtrar solo los usuarios con el rol alumno
+                var usuariosActualizados = await UserManager.Users.AsNoTracking().ToListAsync();
+                var usuariosAlumnos = new List<ApplicationUser>();
+
+                // Obtener roles para cada usuario y filtrar por alumno
+                foreach (var u in usuariosActualizados)
+                {
+                    var roles = await UserManager.GetRolesAsync(u);
+                    if (roles.Contains("alumno", StringComparer.OrdinalIgnoreCase))
+                    {
+                        usuariosAlumnos.Add(u);
+                    }
+                }
+
+                usuarios = usuariosAlumnos;
+                usuarioEditado = new();
+                StateHasChanged();
+
+                await JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('editUsuarioModal')).hide();");
+            }
+        }
+    }
+}

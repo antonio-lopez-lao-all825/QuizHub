@@ -1,10 +1,12 @@
 ﻿@implements IDisposable
-
+@using Microsoft.AspNetCore.Identity
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">QuizHub.Web</a>
+        <a class="navbar-brand" href="">QuizHub</a>
     </div>
 </div>
 
@@ -17,80 +19,133 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Inicio
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="preguntas">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Preguntas
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
+        <!-- Solo mostrar "Preguntas" si está autenticado y es Profesor -->
+        @if (isAuthenticated && isProfesor)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="preguntas">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Preguntas
+                </NavLink>
+            </div>
+        }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-            </NavLink>
-        </div>
+        <!-- Solo mostrar "Asignaturas" si está autenticado y es Profesor -->
+        @if (isAuthenticated && isProfesor)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="Asignaturas">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Asignaturas
+                </NavLink>
+            </div>
+        }
 
-        @* <AuthorizeView>
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView> *@
+        <!-- Solo mostrar "Cuestionarios" si está autenticado y es Profesor -->
+        @if (isAuthenticated && isProfesor)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="Cuestionarios">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Cuestionarios
+                </NavLink>
+            </div>
+        }
+
+        <!-- Solo mostrar "Administrar Usuarios" si está autenticado y es Profesor -->
+        @if (isAuthenticated && isProfesor)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="AdministrarUsuarios">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Administrar Alumnos
+                </NavLink>
+            </div>
+        }
+
+        <!-- Solo mostrar "Cuestionarios (Alumno)" si está autenticado y es Alumno -->
+        @if (isAuthenticated && isAlumno)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="preguntasAlumno">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Cuestionarios (Alumno)
+                </NavLink>
+            </div>
+        }
     </nav>
 </div>
 
 @code {
     private string? currentUrl;
+    private bool isAuthenticated = false;
+    private bool isProfesor = false;
+    private bool isAlumno = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        // Verificar el estado de autenticación
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authenticationState.User;
+
+        // Confirmar que el usuario esté autenticado
+        Console.WriteLine($"User authenticated: {user?.Identity?.IsAuthenticated}");
+
+        if (user != null && user.Identity?.IsAuthenticated == true)
+        {
+            // Obtener el usuario desde UserManager
+            var appUser = await UserManager.GetUserAsync(user);
+
+            if (appUser != null)
+            {
+                // Establecer como autenticado
+                isAuthenticated = true;
+
+                // Obtener los roles del usuario
+                var roles = await UserManager.GetRolesAsync(appUser);
+
+                Console.WriteLine($"User roles: {string.Join(", ", roles)}");
+
+                // Verificar si el usuario tiene el rol de "profesor" (ignorar mayúsculas y minúsculas)
+                isProfesor = roles.Contains("profesor", StringComparer.OrdinalIgnoreCase);
+                isAlumno = roles.Contains("alumno", StringComparer.OrdinalIgnoreCase);
+
+                Console.WriteLine($"Is Profesor: {isProfesor}");
+                Console.WriteLine($"Is Alumno: {isAlumno}");
+            }
+            else
+            {
+                Console.WriteLine("No ApplicationUser found.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("User is not authenticated.");
+        }
+
+        // Si el usuario no está autenticado = falso
+        if (!isAuthenticated)
+        {
+            isProfesor = false;
+            isAlumno = false;
+        }
+
+        // Determinar la URL de navegación para saber cuál está activa
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
+
+        // Re-renderizar al cargar el estado
+        StateHasChanged();
+
+        await base.OnInitializedAsync();
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
+        // Actualizar la URL actual en cada cambio de ubicación
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
     }
 
     public void Dispose()
     {
+        // Limpiar cuando se termine
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-
