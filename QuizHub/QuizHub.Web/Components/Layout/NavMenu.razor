@@ -65,7 +65,17 @@
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="preguntasAlumno">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Cuestionarios (Alumno)
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Cuestionarios
+                </NavLink>
+            </div>
+        }
+
+        <!-- Solo mostrar "Mis Calificaciones" si está autenticado y es Alumno -->
+        @if (isAuthenticated && isAlumno)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="cuestionariosRealizados">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Mis Calificaciones
                 </NavLink>
             </div>
         }

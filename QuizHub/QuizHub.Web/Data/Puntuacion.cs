@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
         public int IdCuestionario { get; set; }
-        public int IdUsuario { get; set; }
+        public string IdUsuario { get; set; }
         public int puntuacion { get; set; }
     } 
 }

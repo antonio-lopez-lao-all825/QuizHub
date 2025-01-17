@@ -44,15 +44,32 @@ namespace QuizHub.Web.Components.Pages
             // Escalar puntuación sobre 10
             puntuacionFinal = (correctas * 10) / preguntas.Count;
 
+            // Obtener el usuario autenticado
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var usuario = authState.User;
+
+            // Validar si el usuario está autenticado
+            if (!usuario.Identity.IsAuthenticated)
+            {
+                // Puedes manejar el caso en el que el usuario no esté autenticado
+                NavigationManager.NavigateTo("/Account/login");
+                return;
+            }
+
+            // Obtener el ID del usuario (puedes usar el Claim que contenga el ID)
+            var userId = usuario.FindFirst("sub")?.Value ?? usuario.Identity.Name;
+
             // Guardar la puntuación en la base de datos
             var nuevaPuntuacion = new Puntuacion
             {
                 IdCuestionario = Id,
-                IdUsuario = 1, // ID del usuario logueado
+                IdUsuario = userId,
                 puntuacion = puntuacionFinal.Value
             };
+
             DbContext.puntuacion.Add(nuevaPuntuacion);
             await DbContext.SaveChangesAsync();
         }
+
     }
 }
