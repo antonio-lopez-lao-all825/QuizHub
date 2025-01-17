@@ -1,0 +1,31 @@
+﻿@page "/cuestionariosRealizados"
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h3>Mis Calificaciones</h3>
+
+@if (puntuaciones == null)
+{
+    <p>Cargando cuestionarios...</p>
+}
+else if (!puntuaciones.Any())
+{
+    <p>No has realizado ningún cuestionario.</p>
+}
+else
+{
+    <div class="cuestionarios-container">
+        @foreach (var puntuacion in puntuaciones)
+        {
+            <div class="cuestionario-item">
+                <h4>@puntuacion.CuestionarioName</h4>
+                <div class="puntuacion-box @GetPuntuacionColorClass(puntuacion.Puntuacion)">
+                    @puntuacion.Puntuacion / 10
+                </div>
+            </div>
+        }
+    </div>
+}
+@code {
+
+}

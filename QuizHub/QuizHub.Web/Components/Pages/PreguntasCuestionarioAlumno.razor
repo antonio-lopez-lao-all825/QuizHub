@@ -1,6 +1,8 @@
 ﻿@page "/detalleCuestionario/{id:int}"
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 @using Microsoft.EntityFrameworkCore
 
 <h3>Detalle Cuestionario</h3>
