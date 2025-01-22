@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace QuizHub.Web.Migrations
 {
     /// <inheritdoc />
-    public partial class Backend_20241113 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -37,7 +37,7 @@ namespace QuizHub.Web.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     IdAsignatura = table.Column<int>(type: "int", nullable: false),
-                    IdUsuario = table.Column<int>(type: "int", nullable: false)
+                    IdUsuario = table.Column<string>(type: "longtext", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -94,8 +94,8 @@ namespace QuizHub.Web.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: false),
                     Asignatura = table.Column<string>(type: "longtext", nullable: false),
-                    IdPregutasCuestionario = table.Column<int>(type: "int", nullable: false),
-                    Estado = table.Column<int>(type: "int", nullable: false)
+                    Estado = table.Column<int>(type: "int", nullable: false),
+                    IdUsuario = table.Column<string>(type: "longtext", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -110,7 +110,8 @@ namespace QuizHub.Web.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: false),
-                    Estado = table.Column<int>(type: "int", nullable: false)
+                    Estado = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "longtext", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -134,15 +135,31 @@ namespace QuizHub.Web.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "puntuacion",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    IdCuestionario = table.Column<int>(type: "int", nullable: false),
+                    IdUsuario = table.Column<string>(type: "longtext", nullable: false),
+                    puntuacion = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_puntuacion", x => x.Id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "respuestas",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     IdPregunta = table.Column<int>(type: "int", nullable: true),
-                    Texto = table.Column<string>(type: "longtext", nullable: false),
-                    Correcta = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    Estado = table.Column<int>(type: "int", nullable: false)
+                    Texto = table.Column<string>(type: "longtext", nullable: true),
+                    Correcta = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    Estado = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -331,6 +348,9 @@ namespace QuizHub.Web.Migrations
 
             migrationBuilder.DropTable(
                 name: "preguntasCuestionario");
+
+            migrationBuilder.DropTable(
+                name: "puntuacion");
 
             migrationBuilder.DropTable(
                 name: "respuestas");

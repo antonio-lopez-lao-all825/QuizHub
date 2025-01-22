@@ -6,5 +6,6 @@
         public int IdCuestionario { get; set; }
         public string IdUsuario { get; set; }
         public int puntuacion { get; set; }
+
     } 
 }
