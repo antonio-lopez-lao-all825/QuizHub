@@ -3,24 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\account\\shared\\managelayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\account\\shared\\managelayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\pages\\administrarusuarios.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\pages\\administrarusuarios.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\pages\\gestioncuestionarios.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\pages\\gestioncuestionarios.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\pages\\administrarusuarios.razor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\pages\\administrarusuarios.razor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\pages\\cuestionariosalumno.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -31,16 +19,8 @@
       "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\account\\pages\\forgotpassword.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\pages\\resultadoscuestionario.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\pages\\resultadoscuestionario.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\pages\\cuestionariosalumno.razor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\pages\\cuestionariosalumno.razor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\pages\\resultadoscuestionario.razor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|solutionrelative:quizhub.web\\components\\pages\\resultadoscuestionario.razor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E5B6442F-76DD-4365-8CAE-61EE6EBD24A0}|QuizHub.Web\\QuizHub.Web.csproj|c:\\users\\dxrof\\source\\repos\\ab005\\quizhub_definitivo\\quizhub\\quizhub.web\\components\\pages\\preguntascuestionarioalumno.razor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -62,7 +42,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -74,98 +54,56 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Home.razor",
               "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\Home.razor",
               "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\Home.razor",
               "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\Home.razor",
               "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\Home.razor",
-              "ViewState": "AgIAACMAAAAAAAAAAAAIwCgAAAAxAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAIwAYAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-01-25T15:33:15.364Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-25T15:33:15.364Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "ManageLayout.razor",
               "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Account\\Shared\\ManageLayout.razor",
               "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Account\\Shared\\ManageLayout.razor",
               "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Account\\Shared\\ManageLayout.razor",
               "RelativeToolTip": "QuizHub.Web\\Components\\Account\\Shared\\ManageLayout.razor",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-01-25T15:02:32.385Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "AdministrarUsuarios.razor",
-              "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\AdministrarUsuarios.razor",
-              "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\AdministrarUsuarios.razor",
-              "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\AdministrarUsuarios.razor",
-              "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\AdministrarUsuarios.razor",
-              "ViewState": "AgIAALAAAAAAAAAAAAAIwLkAAABWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-01-25T14:26:44.336Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "GestionCuestionarios.razor",
-              "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\GestionCuestionarios.razor",
-              "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\GestionCuestionarios.razor",
-              "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\GestionCuestionarios.razor",
-              "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\GestionCuestionarios.razor",
-              "ViewState": "AgIAAJIDAAAAAAAAAAAmwMQDAAAnAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-01-25T10:51:36.121Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "AdministrarUsuarios.razor.cs",
-              "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\AdministrarUsuarios.razor.cs",
-              "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\AdministrarUsuarios.razor.cs",
-              "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\AdministrarUsuarios.razor.cs",
-              "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\AdministrarUsuarios.razor.cs",
-              "ViewState": "AgIAAGkAAAAAAAAAAAAcwHAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-25T08:55:31.385Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
               "Title": "ForgotPassword.razor",
               "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Account\\Pages\\ForgotPassword.razor",
               "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Account\\Pages\\ForgotPassword.razor",
               "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Account\\Pages\\ForgotPassword.razor",
               "RelativeToolTip": "QuizHub.Web\\Components\\Account\\Pages\\ForgotPassword.razor",
-              "ViewState": "AgIAABEAAAAAAAAAAAAvwCYAAAA4AAAAAAAAAA==",
+              "ViewState": "AgIAABAAAAAAAAAAAAAvwBoAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-01-25T08:31:08.527Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-25T08:31:08.527Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 6,
               "Title": "PreguntasCuestionarioAlumno.razor",
               "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\PreguntasCuestionarioAlumno.razor",
               "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\PreguntasCuestionarioAlumno.razor",
               "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\PreguntasCuestionarioAlumno.razor",
               "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\PreguntasCuestionarioAlumno.razor",
-              "ViewState": "AgIAAEgAAAAAAAAAAADwv2gAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAACMAAAAAAAAAAADwvywAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-01-24T13:15:11.256Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-24T13:15:11.256Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 7,
               "Title": "Puntuacion.cs",
               "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Data\\Puntuacion.cs",
               "RelativeDocumentMoniker": "QuizHub.Web\\Data\\Puntuacion.cs",
@@ -173,73 +111,43 @@
               "RelativeToolTip": "QuizHub.Web\\Data\\Puntuacion.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-24T12:58:57.96Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-24T12:58:57.96Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 4,
               "Title": "CuestionariosAlumno.razor.cs",
               "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\CuestionariosAlumno.razor.cs",
               "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\CuestionariosAlumno.razor.cs",
               "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\CuestionariosAlumno.razor.cs",
               "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\CuestionariosAlumno.razor.cs",
-              "ViewState": "AgIAADAAAAAAAAAAAAAQwDYAAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAYwBUAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-24T12:50:44.007Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-24T12:50:44.007Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 2,
               "Title": "CuestionariosAlumno.razor",
               "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\CuestionariosAlumno.razor",
               "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\CuestionariosAlumno.razor",
               "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\CuestionariosAlumno.razor",
               "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\CuestionariosAlumno.razor",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAjwBYAAAArAAAAAAAAAA==",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAjwAsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-01-24T12:50:34.119Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-24T12:50:34.119Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "ResultadosCuestionario.razor",
-              "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\ResultadosCuestionario.razor",
-              "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\ResultadosCuestionario.razor",
-              "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\ResultadosCuestionario.razor",
-              "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\ResultadosCuestionario.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADkAAABjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-01-24T21:13:40.998Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 5,
               "Title": "PreguntasCuestionarioAlumno.razor.cs",
               "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\PreguntasCuestionarioAlumno.razor.cs",
               "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\PreguntasCuestionarioAlumno.razor.cs",
               "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\PreguntasCuestionarioAlumno.razor.cs",
               "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\PreguntasCuestionarioAlumno.razor.cs",
-              "ViewState": "AgIAADgAAAAAAAAAAAAjwD8AAAANAAAAAAAAAA==",
+              "ViewState": "AgIAADgAAAAAAAAAAAAjwD0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-24T21:08:20.964Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "ResultadosCuestionario.razor.cs",
-              "DocumentMoniker": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\ResultadosCuestionario.razor.cs",
-              "RelativeDocumentMoniker": "QuizHub.Web\\Components\\Pages\\ResultadosCuestionario.razor.cs",
-              "ToolTip": "C:\\Users\\dxrof\\source\\repos\\ab005\\QuizHub_DEFINITIVO\\QuizHub\\QuizHub.Web\\Components\\Pages\\ResultadosCuestionario.razor.cs",
-              "RelativeToolTip": "QuizHub.Web\\Components\\Pages\\ResultadosCuestionario.razor.cs",
-              "ViewState": "AgIAAAcAAAAAAAAAAAAWwA8AAAAVAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-24T21:11:42.732Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-24T21:08:20.964Z"
             }
           ]
         }
