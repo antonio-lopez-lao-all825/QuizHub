@@ -1,0 +1,109 @@
+@page "/mostrarResultadosCuestionario/{id:int}"
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="results-page">
+    <div class="results-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-chart-simple"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Resultados del Cuestionario</h1>
+            <div class="score-banner">
+                <div class="score-circle @GetScoreClass(puntuacionUsuario)">
+                    <div class="score-content">
+                        <span class="score">@puntuacionUsuario</span>
+                        <span class="total">/10</span>
+                    </div>
+                    <svg class="score-ring">
+                        <circle class="score-background" cx="60" cy="60" r="54"></circle>
+                        <circle class="score-progress" cx="60" cy="60" r="54" 
+                                style="stroke-dasharray: @(339.292 * puntuacionUsuario/10) 339.292"></circle>
+                    </svg>
+                </div>
+                <div class="score-details">
+                    <p class="score-text">Tu puntuación</p>
+                    <p class="score-message">@GetScoreMessage(puntuacionUsuario)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (preguntas != null && respuestas != null)
+    {
+        <div class="results-container">
+            <div class="questions-list">
+                @for (int i = 0; i < preguntas.Count; i++)
+                {
+                    var pregunta = preguntas[i];
+                    <div class="question-card">
+                        <div class="question-header">
+                            <div class="question-number">Pregunta @(i + 1)</div>
+                            <div class="question-stats">
+                                @{
+                                    var correctCount = respuestas.Count(r => r.IdPregunta == pregunta.Id && r.Correcta == true);
+                                    var totalCount = respuestas.Count(r => r.IdPregunta == pregunta.Id);
+                                    var percentage = (correctCount * 100) / totalCount;
+                                }
+                                <span class="stat-label">Tasa de acierto:</span>
+                                <span class="stat-value">@percentage%</span>
+                            </div>
+                        </div>
+                        <h3>@pregunta.Name</h3>
+                        <div class="answers-grid">
+                            @foreach (var respuesta in respuestas.Where(r => r.IdPregunta == pregunta.Id))
+                            {
+                                <div class="answer-display @(respuesta.Correcta.GetValueOrDefault() ? "correct" : "incorrect")">
+                                    <div class="answer-icon">
+                                        <i class="@(respuesta.Correcta.GetValueOrDefault() ? "fa-solid fa-check" : "fa-solid fa-xmark")"></i>
+                                    </div>
+                                    <span class="answer-text">@respuesta.Texto</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="results-footer">
+                <button type="button" class="action-button" @onclick="NavigateBack">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Volver a cuestionarios</span>
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="loading-state">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <p>Cargando resultados...</p>
+        </div>
+    }
+</div>
+
+@code {
+    private string GetScoreClass(double score)
+    {
+        return score switch
+        {
+            >= 9 => "excellent",
+            >= 7 => "good",
+            >= 5 => "average",
+            _ => "needs-improvement"
+        };
+    }
+
+    private string GetScoreMessage(double score)
+    {
+        return score switch
+        {
+            >= 9 => "¡Excelente trabajo!",
+            >= 7 => "¡Muy buen resultado!",
+            >= 5 => "¡Has aprobado!",
+            _ => "Sigue practicando"
+        };
+    }
+} 

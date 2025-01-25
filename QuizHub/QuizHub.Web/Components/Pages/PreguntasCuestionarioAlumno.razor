@@ -5,43 +5,107 @@
 
 @using Microsoft.EntityFrameworkCore
 
-<h3>Detalle Cuestionario</h3>
+<div class="quiz-page">
+    <div class="quiz-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-pencil"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Realizar Cuestionario</h1>
+            <p>Lee atentamente cada pregunta y selecciona la respuesta correcta</p>
+        </div>
+    </div>
 
-@if (preguntas != null && respuestas != null)
-{
-    <EditForm Model="@respuestasUsuario" OnValidSubmit="@CalcularPuntuacion">
-        @foreach (var pregunta in preguntas)
-        {
-            <div class="pregunta-container">
-                <h4>@pregunta.Name</h4>
-                <div>
-                    @foreach (var respuesta in respuestas.Where(r => r.IdPregunta == pregunta.Id))
+    @if (preguntas != null && respuestas != null)
+    {
+        <div class="quiz-container">
+            <EditForm Model="@respuestasUsuario" OnValidSubmit="@CalcularPuntuacion">
+                <div class="questions-list">
+                    @for (int i = 0; i < preguntas.Count; i++)
                     {
-                        <label>
-                            <input type="radio" name="respuesta-@pregunta.Id" value="@respuesta.Id" @onchange="() => SeleccionarRespuesta(pregunta.Id, respuesta.Id.Value)" />
-                            @respuesta.Texto
-                        </label>
-                        <br />
+                        var pregunta = preguntas[i];
+                        <div class="question-card">
+                            <div class="question-number">Pregunta @(i + 1)</div>
+                            <h3>@pregunta.Name</h3>
+                            <div class="answers-grid">
+                                @foreach (var respuesta in respuestas.Where(r => r.IdPregunta == pregunta.Id))
+                                {
+                                    <label class="answer-option">
+                                        <input type="radio" 
+                                               name="respuesta-@pregunta.Id" 
+                                               value="@respuesta.Id" 
+                                               @onchange="(args) => SeleccionarRespuesta(pregunta.Id, respuesta.Id.Value)" />
+                                        <span class="radio-custom"></span>
+                                        <span class="answer-text">@respuesta.Texto</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
                     }
                 </div>
-            </div>
-        }
 
-        <button type="submit" class="boton-enviar">Calcular Puntuación</button>
-    </EditForm>
+                <div class="quiz-footer">
+                    <button type="submit" class="submit-button">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Finalizar cuestionario</span>
+                    </button>
+                </div>
+            </EditForm>
 
-    @if (puntuacionFinal.HasValue)
-    {
-        <div class="resultado">
-            <h4>Tu puntuación: @puntuacionFinal/10</h4>
+            @if (puntuacionFinal.HasValue)
+            {
+                <div class="result-modal @(puntuacionFinal.HasValue ? "show" : "")">
+                    <div class="result-content">
+                        <div class="result-icon">
+                            @if (puntuacionFinal >= 7)
+                            {
+                                <i class="fa-solid fa-trophy"></i>
+                            }
+                            else if (puntuacionFinal >= 5)
+                            {
+                                <i class="fa-solid fa-star"></i>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-book"></i>
+                            }
+                        </div>
+                        <h2>¡Cuestionario completado!</h2>
+                        <div class="score-display">
+                            <span class="score">@puntuacionFinal?.ToString("F1")</span>
+                            <span class="total">/10</span>
+                        </div>
+                        <p class="result-message">
+                            @(puntuacionFinal >= 5 ? "¡Buen trabajo!" : "¡Sigue practicando!")
+                        </p>
+                        <div class="modal-actions">
+                            <button type="button" class="action-button secondary" @onclick="@(() => NavigationManager.NavigateTo("/preguntasAlumno"))">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                <span>Volver a cuestionarios</span>
+                            </button>
+                            <button type="button" class="action-button primary" @onclick="@(() => NavigationManager.NavigateTo($"/mostrarResultadosCuestionario/{Id}"))">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>Ver resultados detallados</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     }
-}
-else
-{
-    <p>Cargando preguntas...</p>
-}
+    else
+    {
+        <div class="loading-state">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <p>Cargando cuestionario...</p>
+        </div>
+    }
+</div>
 
 @code {
- 
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/preguntasAlumno");
+    }
 }

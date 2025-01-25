@@ -16,47 +16,89 @@
 @inject IdentityRedirectManager RedirectManager
 @inject RoleManager<IdentityRole> RoleManager
 
-<PageTitle>Register</PageTitle>
+<PageTitle>Registro - QuizHub</PageTitle>
 
-<h1>Register</h1>
+<div class="register-container">
+    <div class="register-card">
+        <div class="card-header">
+            <div class="header-icon">
+                <i class="fa-solid fa-user-plus"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Crear Cuenta</h1>
+            <p>Únete a QuizHub y comienza tu viaje de aprendizaje</p>
+        </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <StatusMessage Message="@Message" />
-        <EditForm Model="Input" OnValidSubmit="RegisterUser" FormName="register">
-            <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label for="email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="confirm-password">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Role" class="form-control" required placeholder="Enter your role" />
-                <label for="role">Role</label>
-                <ValidationMessage For="() => Input.Role" class="text-danger" />
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </EditForm>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
+        <div class="card-body">
+            <StatusMessage Message="@Message" />
+            <EditForm Model="Input" OnValidSubmit="RegisterUser" FormName="register">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" role="alert" />
+                
+                <div class="form-group">
+                    <label>
+                        <i class="fa-solid fa-envelope"></i>
+                        Correo electrónico
+                    </label>
+                    <InputText @bind-Value="Input.Email" 
+                              class="form-control" 
+                              autocomplete="username" 
+                              placeholder="nombre@ejemplo.com" />
+                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fa-solid fa-lock"></i>
+                        Contraseña
+                    </label>
+                    <InputText type="password" 
+                              @bind-Value="Input.Password" 
+                              class="form-control" 
+                              autocomplete="new-password" 
+                              placeholder="Tu contraseña" />
+                    <ValidationMessage For="() => Input.Password" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fa-solid fa-lock"></i>
+                        Confirmar Contraseña
+                    </label>
+                    <InputText type="password" 
+                              @bind-Value="Input.ConfirmPassword" 
+                              class="form-control" 
+                              autocomplete="new-password" 
+                              placeholder="Repite tu contraseña" />
+                    <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fa-solid fa-user-tag"></i>
+                        Tipo de Usuario
+                    </label>
+                    <InputSelect @bind-Value="Input.Role" class="form-control">
+                        <option value="">Seleccione un rol</option>
+                        <option value="Profesor">Profesor</option>
+                        <option value="Alumno">Alumno</option>
+                    </InputSelect>
+                    <ValidationMessage For="() => Input.Role" class="text-danger" />
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-user-plus"></i>
+                    Crear Cuenta
+                </button>
+
+                <div class="links-section">
+                    <a href="Account/Login" class="login-link">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Volver al inicio de sesión
+                    </a>
+                </div>
+            </EditForm>
+        </div>
     </div>
 </div>
 
@@ -70,9 +112,9 @@
 
     public async Task RegisterUser()
     {
-        if (string.IsNullOrWhiteSpace(Input.Role))
+        if (Input.Role != "Profesor" && Input.Role != "Alumno")
         {
-            identityErrors = new[] { new IdentityError { Description = "You must specify a role." } };
+            identityErrors = new[] { new IdentityError { Description = "El rol debe ser 'Profesor' o 'Alumno'." } };
             return;
         }
 
@@ -166,7 +208,7 @@
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
 
-        [Required]
+        [Required(ErrorMessage = "El rol es obligatorio")]
         [Display(Name = "Role")]
         public string Role { get; set; } = "";
     }

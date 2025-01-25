@@ -1,7 +1,415 @@
 ﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@implements IDisposable
 
-<PageTitle>Home</PageTitle>
+<div class="hero-section">
+    <div class="hero-content">
+        <div class="hero-text-container">
+            <h1 class="hero-title">
+                <span class="gradient-text">Quiz</span>Hub
+                <div class="hero-shapes">
+                    <div class="shape shape-1"></div>
+                    <div class="shape shape-2"></div>
+                    <div class="shape shape-3"></div>
+                </div>
+            </h1>
+            <p class="hero-subtitle">Aprende, juega y compite con cuestionarios interactivos</p>
+            
+            <div class="hero-cta">
+            </div>
+        </div>
+        <div class="hero-illustration">
+            <div class="floating-elements">
+                <div class="float-item item-1">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="float-item item-2">
+                    <i class="fa-solid fa-book"></i>
+                </div>
+                <div class="float-item item-3">
+                    <i class="fa-solid fa-lightbulb"></i>
+                </div>
+                <div class="float-item item-4">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="wave-container">
+        <svg class="wave" viewBox="0 0 1440 320">
+            <path fill="currentColor" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+    </div>
+</div>
 
-<h1>Hello, world!</h1>
+<div class="intro-section">
+    <div class="intro-content">
+        <div class="intro-icon">
+            <i class="fa-solid fa-rocket"></i>
+            <div class="icon-ring"></div>
+        </div>
+        <h2>Aprende a tu ritmo</h2>
+        <p>QuizHub es una plataforma educativa diseñada para hacer el aprendizaje más interactivo y efectivo.</p>
+        <div class="intro-features">
+            <div class="intro-feature">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <h3>Flexible</h3>
+                <p>Estudia cuando y donde quieras</p>
+            </div>
+            <div class="intro-feature">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <h3>Progresivo</h3>
+                <p>Seguimiento en tiempo real</p>
+            </div>
+            <div class="intro-feature">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <h3>Colaborativo</h3>
+                <p>Aprende con otros estudiantes</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-Welcome to your new app.
+<div class="features-section">
+    <div class="feature-card">
+        <div class="feature-icon-wrapper">
+            <i class="bi bi-mortarboard-fill"></i>
+            <div class="icon-background"></div>
+        </div>
+        <h3>Asignaturas</h3>
+        <p>Explora diferentes materias y temas de forma interactiva</p>
+        <div class="feature-footer">
+            <span class="feature-stat">5+ Asignaturas</span>
+            <i class="bi bi-arrow-right"></i>
+        </div>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon-wrapper">
+            <i class="bi bi-trophy-fill"></i>
+            <div class="icon-background"></div>
+        </div>
+        <h3>Cuestionarios</h3>
+        <p>Pon a prueba tus conocimientos con ejercicios prácticos</p>
+        <div class="feature-footer">
+            <span class="feature-stat">10+ Tests</span>
+            <i class="bi bi-arrow-right"></i>
+        </div>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon-wrapper">
+            <i class="bi bi-graph-up-arrow"></i>
+            <div class="icon-background"></div>
+        </div>
+        <h3>Progreso</h3>
+        <p>Visualiza y analiza tu evolución académica</p>
+        <div class="feature-footer">
+            <span class="feature-stat">Estadísticas en vivo</span>
+            <i class="bi bi-arrow-right"></i>
+        </div>
+    </div>
+</div>
+
+<div class="platform-section">
+    <div class="platform-content">
+        <div class="platform-header">
+            <div class="platform-icon">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h2>Una plataforma para todos</h2>
+            <p>Ya seas estudiante o profesor, QuizHub te ofrece las herramientas necesarias para mejorar la experiencia educativa.</p>
+        </div>
+        <div class="platform-cards">
+            <div class="platform-card">
+                <div class="card-icon">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                </div>
+                <h3>Profesores</h3>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i> Crea cuestionarios personalizados</li>
+                    <li><i class="fa-solid fa-check"></i> Gestiona tus asignaturas</li>
+                    <li><i class="fa-solid fa-check"></i> Analiza el progreso de tus alumnos</li>
+                </ul>
+            </div>
+            <div class="platform-card">
+                <div class="card-icon">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <h3>Estudiantes</h3>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i> Realiza pruebas interactivas</li>
+                    <li><i class="fa-solid fa-check"></i> Visualiza tu progreso</li>
+                    <li><i class="fa-solid fa-check"></i> Aprende de tus errores</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="stats-section">
+    <div class="section-header">
+        <div class="section-icon">
+            <i class="bi bi-bar-chart-line"></i>
+        </div>
+        <h2 class="section-title">Tendencias</h2>
+        <p class="section-subtitle">Descubre lo más popular en QuizHub</p>
+    </div>
+    
+    @if (isLoading)
+    {
+        <div class="loading-state">
+            <i class="bi bi-arrow-repeat spin"></i>
+            <p>Cargando estadísticas...</p>
+        </div>
+    }
+    else
+    {
+        <div class="stats-grid">
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <div class="stats-icon-wrapper">
+                        <i class="bi bi-book-half"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    <h3>Asignaturas Populares</h3>
+                </div>
+                <div class="stats-list">
+                    @if (!asignaturasPopulares.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p>No hay asignaturas disponibles</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var (asignatura, index) in asignaturasPopulares.Select((a, i) => (a, i)))
+                        {
+                            <div class="stats-item">
+                                <div class="stats-medal @(index < 3 ? $"medal-{index + 1}" : "")">
+                                    @if (index < 3)
+                                    {
+                                        <i class="fa-solid fa-trophy"></i>
+                                    }
+                                    else
+                                    {
+                                        <span>@(index + 1)</span>
+                                    }
+                                </div>
+                                <div class="stats-content">
+                                    <div class="stats-info">
+                                        <i class="fa-solid fa-book"></i>
+                                        <span class="stats-name">@asignatura.Name</span>
+                                        <span class="stats-badge">@asignatura.CuestionariosCount cuestionarios</span>
+                                    </div>
+                                    <div class="stats-details">
+                                        <div class="stats-progress">
+                                            <div class="progress-bar" style="width: @(asignatura.CuestionariosCount * 20)%">
+                                                <div class="progress-glow"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <div class="stats-icon-wrapper">
+                        <i class="bi bi-star"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    <h3>Cuestionarios Destacados</h3>
+                </div>
+                <div class="stats-list">
+                    @if (!cuestionariosPopulares.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p>No hay cuestionarios disponibles</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var (cuestionario, index) in cuestionariosPopulares.Select((c, i) => (c, i)))
+                        {
+                            <div class="stats-item">
+                                <div class="stats-medal @(index < 3 ? $"medal-{index + 1}" : "")">
+                                    @if (index < 3)
+                                    {
+                                        <i class="fa-solid fa-trophy"></i>
+                                    }
+                                    else
+                                    {
+                                        <span>@(index + 1)</span>
+                                    }
+                                </div>
+                                <div class="stats-content">
+                                    <div class="stats-info">
+                                        <i class="fa-solid fa-file-lines"></i>
+                                        <span class="stats-name">@cuestionario.Name</span>
+                                        <span class="stats-badge">@cuestionario.RealizacionesCount realizaciones</span>
+                                    </div>
+                                    <div class="stats-details">
+                                        <div class="stats-progress">
+                                            <div class="progress-bar" style="width: @(cuestionario.RealizacionesCount * 20)%">
+                                                <div class="progress-glow"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string searchTerm = "";
+    private List<SearchResult> searchResults = new();
+    private List<AsignaturaStats> asignaturasPopulares = new();
+    private List<CuestionarioStats> cuestionariosPopulares = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        isLoading = true;
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            
+            // Cargar asignaturas populares
+            var asignaturasQuery = await context.asignaturas
+                .Select(a => new AsignaturaStats
+                {
+                    Name = a.Name,
+                    CuestionariosCount = context.cuestionarios
+                        .Where(c => c.Asignatura == a.Name && c.Estado == 1)
+                        .Count()
+                })
+                .OrderByDescending(x => x.CuestionariosCount)
+                .Take(5)
+                .ToListAsync();
+
+            // Cargar cuestionarios populares
+            var cuestionariosQuery = await context.cuestionarios
+                .Where(c => c.Estado == 1)
+                .Select(c => new CuestionarioStats
+                {
+                    Name = c.Name,
+                    RealizacionesCount = context.puntuacion
+                        .Count(p => p.IdCuestionario == c.Id)
+                })
+                .OrderByDescending(x => x.RealizacionesCount)
+                .Take(5)
+                .ToListAsync();
+
+            asignaturasPopulares = asignaturasQuery;
+            cuestionariosPopulares = cuestionariosQuery;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar estadísticas: {ex.Message}");
+            asignaturasPopulares = new List<AsignaturaStats>();
+            cuestionariosPopulares = new List<CuestionarioStats>();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSearch()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                searchResults.Clear();
+                return;
+            }
+
+            using var context = await DbFactory.CreateDbContextAsync();
+            var termLower = searchTerm.ToLower();
+
+            // Realizar búsqueda en una sola consulta
+            var resultados = new List<SearchResult>();
+
+            // Buscar asignaturas activas
+            var asignaturas = await context.asignaturas
+                .Where(a => a.Estado == 1 && a.Name.ToLower().Contains(termLower))
+                .Take(3)
+                .Select(a => new SearchResult 
+                { 
+                    Nombre = a.Name, 
+                    IsAsignatura = true 
+                })
+                .ToListAsync();
+
+            // Buscar cuestionarios activos
+            var cuestionarios = await context.cuestionarios
+                .Where(c => c.Estado == 1 && c.Name.ToLower().Contains(termLower))
+                .Take(3)
+                .Select(c => new SearchResult 
+                { 
+                    Nombre = c.Name, 
+                    IsAsignatura = false 
+                })
+                .ToListAsync();
+
+            searchResults = asignaturas.Concat(cuestionarios).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error en la búsqueda: {ex.Message}");
+            searchResults.Clear();
+        }
+    }
+
+    public void Dispose()
+    {
+        // Asegurarnos de que cualquier contexto pendiente se disponga correctamente
+        if (searchResults != null)
+        {
+            searchResults.Clear();
+        }
+    }
+
+    private class SearchResult
+    {
+        public string Nombre { get; set; }
+        public bool IsAsignatura { get; set; }
+    }
+
+    private class AsignaturaStats
+    {
+        public string Name { get; set; }
+        public int CuestionariosCount { get; set; }
+    }
+
+    private class CuestionarioStats
+    {
+        public string Name { get; set; }
+        public int RealizacionesCount { get; set; }
+    }
+}

@@ -11,24 +11,48 @@
 
 <PageTitle>Profile</PageTitle>
 
-<h3>Profile</h3>
-<StatusMessage />
+<div class="profile-page">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-user-circle"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Mi Perfil</h1>
+            <p>Gestiona tu información personal</p>
+        </div>
+    </div>
 
-<div class="row">
-    <div class="col-md-6">
+    <div class="profile-card">
+        <StatusMessage />
+        
         <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <input type="text" value="@username" class="form-control" placeholder="Please choose your username." disabled />
-                <label for="username" class="form-label">Username</label>
+            <div class="validation-summary">
+                <ValidationSummary role="alert" />
             </div>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
-                <label for="phone-number" class="form-label">Phone number</label>
-                <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
+
+            <div class="form-group">
+                <label>Nombre de Usuario</label>
+                <div class="input-with-icon">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" value="@username" disabled />
+                </div>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+
+            <div class="form-group">
+                <label>Teléfono</label>
+                <div class="input-with-icon">
+                    <i class="fa-solid fa-phone"></i>
+                    <InputText @bind-Value="Input.PhoneNumber" placeholder="Ingresa tu número de teléfono" />
+                </div>
+                <ValidationMessage For="() => Input.PhoneNumber" />
+            </div>
+
+            <button type="submit" class="btn-save">
+                <i class="fa-solid fa-save"></i>
+                Guardar Cambios
+            </button>
         </EditForm>
     </div>
 </div>

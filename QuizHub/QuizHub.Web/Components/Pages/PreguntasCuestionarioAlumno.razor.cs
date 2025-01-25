@@ -46,24 +46,28 @@ namespace QuizHub.Web.Components.Pages
 
             // Obtener el usuario autenticado
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var usuario = authState.User;
+            var user = authState.User;
 
-            // Validar si el usuario está autenticado
-            if (!usuario.Identity.IsAuthenticated)
+            if (!user.Identity.IsAuthenticated)
             {
-                // Puedes manejar el caso en el que el usuario no esté autenticado
                 NavigationManager.NavigateTo("/Account/login");
                 return;
             }
 
-            // Obtener el ID del usuario (puedes usar el Claim que contenga el ID)
-            var userId = usuario.FindFirst("sub")?.Value ?? usuario.Identity.Name;
+            // Obtener el ID del usuario usando ClaimTypes.NameIdentifier en lugar del email
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("Error: No se pudo obtener el ID del usuario");
+                return;
+            }
 
             // Guardar la puntuación en la base de datos
             var nuevaPuntuacion = new Puntuacion
             {
                 IdCuestionario = Id,
-                IdUsuario = userId,
+                IdUsuario = userId,  // Ahora aseguramos que siempre sea el ID
                 puntuacion = puntuacionFinal.Value
             };
 

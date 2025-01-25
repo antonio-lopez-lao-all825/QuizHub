@@ -1,31 +1,182 @@
 ﻿@page "/cuestionariosRealizados"
 @inject ApplicationDbContext DbContext
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@using Radzen.Blazor
+@using Radzen
 
-<h3>Mis Calificaciones</h3>
+<div class="dashboard-page">
+    <div class="dashboard-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-chart-line"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Mi Progreso Académico</h1>
+            <p>Visualiza y analiza tu rendimiento en los cuestionarios</p>
+        </div>
+    </div>
 
-@if (puntuaciones == null)
-{
-    <p>Cargando cuestionarios...</p>
-}
-else if (!puntuaciones.Any())
-{
-    <p>No has realizado ningún cuestionario.</p>
-}
-else
-{
-    <div class="cuestionarios-container">
-        @foreach (var puntuacion in puntuaciones)
-        {
-            <div class="cuestionario-item">
-                <h4>@puntuacion.CuestionarioName</h4>
-                <div class="puntuacion-box @GetPuntuacionColorClass(puntuacion.Puntuacion)">
-                    @puntuacion.Puntuacion / 10
+    @if (puntuaciones == null)
+    {
+        <div class="loading-state">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <p>Cargando datos...</p>
+        </div>
+    }
+    else if (!puntuaciones.Any())
+    {
+        <div class="empty-state">
+            <i class="fa-solid fa-clipboard-question"></i>
+            <p>Aún no has realizado ningún cuestionario</p>
+            <a href="/preguntasAlumno" class="action-button">
+                <i class="fa-solid fa-play"></i>
+                <span>Comenzar ahora</span>
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="dashboard-grid">
+            <!-- Resumen General -->
+            <div class="dashboard-card summary-card">
+                <h3>Resumen General</h3>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">@puntuaciones.Count</div>
+                        <div class="stat-label">Cuestionarios Completados</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">@promedioGeneral.ToScoreString()</div>
+                        <div class="stat-label">Promedio General</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">@asignaturasUnicas.Count</div>
+                        <div class="stat-label">Asignaturas</div>
+                    </div>
                 </div>
             </div>
-        }
-    </div>
-}
-@code {
 
-}
+            <!-- Gráfico de Evolución -->
+            <div class="dashboard-card chart-card">
+                <h3>Evolución del Rendimiento</h3>
+                <RadzenChart>
+                    <RadzenLineSeries Data="@puntuacionesPorFecha" 
+                                    CategoryProperty="Fecha" 
+                                    ValueProperty="Puntuacion"
+                                    Title="Puntuación"
+                                    Smooth="true"
+                                    LineType="LineType.Solid"
+                                    StrokeWidth="3">
+                        <RadzenMarkers MarkerType="MarkerType.Circle" Size="8" />
+                        <RadzenSeriesDataLabels Visible="true" />
+                    </RadzenLineSeries>
+                    <RadzenCategoryAxis Padding="20" FormatString="{0:dd/MM}" />
+                    <RadzenValueAxis Min="0" Max="10" Step="2">
+                        <RadzenGridLines Visible="true" />
+                        <RadzenAxisTitle Text="Puntuación" />
+                    </RadzenValueAxis>
+                    <RadzenLegend Position="LegendPosition.Bottom" />
+                </RadzenChart>
+            </div>
+
+            <!-- Distribución por Asignaturas -->
+            <div class="dashboard-card chart-card">
+                <h3>Rendimiento por Asignatura</h3>
+                <RadzenChart>
+                    <RadzenBarSeries Data="@promediosPorAsignatura"
+                                   CategoryProperty="Asignatura"
+                                   ValueProperty="Promedio"
+                                   Title="Promedio por Asignatura"
+                                   Fill="var(--primary-color)">
+                        <RadzenSeriesDataLabels Visible="true" />
+                    </RadzenBarSeries>
+                    <RadzenValueAxis Min="0" Max="10" Step="2">
+                        <RadzenGridLines Visible="true" />
+                        <RadzenAxisTitle Text="Promedio" />
+                    </RadzenValueAxis>
+                    <RadzenLegend Position="LegendPosition.Bottom" Visible="false" />
+                </RadzenChart>
+            </div>
+
+            <!-- Lista de Calificaciones con Paginación Mejorada -->
+            <div class="dashboard-card full-width">
+                <div class="card-header">
+                    <h3>Historial de Calificaciones</h3>
+                    <div class="filters">
+                        <div class="filter-dropdown">
+                            <RadzenDropDown Data="@(new[] { "Todas las asignaturas" }.Concat(asignaturasUnicas))" 
+                                          @bind-Value="@filtroAsignatura"
+                                          Change="@FiltrarCalificaciones"
+                                          Class="rz-dropdown-custom" />
+                        </div>
+                        <div class="search-box">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" 
+                                   @bind="searchTerm" 
+                                   @bind:event="oninput"
+                                   @onkeyup="FiltrarCalificaciones"
+                                   placeholder="Buscar cuestionarios..." />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grades-grid">
+                    @foreach (var grupo in GetPuntuacionesPaginadas())
+                    {
+                        <div class="subject-group">
+                            <div class="subject-header">
+                                <div class="subject-info">
+                                    <h4>@grupo.Key</h4>
+                                    <span class="subject-count">@grupo.Count() cuestionarios</span>
+                                </div>
+                                <span class="subject-average">
+                                    <i class="fa-solid fa-star"></i>
+                                    Promedio: @grupo.Average(p => p.Puntuacion).ToScoreString()
+                                </span>
+                            </div>
+                            <div class="grades-list">
+                                @foreach (var puntuacion in grupo)
+                                {
+                                    <div class="grade-card @GetScoreClass(puntuacion.Puntuacion)">
+                                        <div class="grade-info">
+                                            <h5>@puntuacion.CuestionarioName</h5>
+                                            <div class="grade-meta">
+                                                <span class="grade-date">
+                                                    <i class="fa-regular fa-calendar"></i>
+                                                    @puntuacion.Fecha.ToString("dd/MM/yyyy")
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="grade-score">
+                                            <span class="score">@puntuacion.Puntuacion.ToScoreString()</span>
+                                            <span class="total">/10</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (puntuacionesFiltradas.Count > elementosPorPagina)
+                {
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            Mostrando @(((paginaActual - 1) * elementosPorPagina) + 1) - @(Math.Min(paginaActual * elementosPorPagina, puntuacionesFiltradas.Count)) de @puntuacionesFiltradas.Count resultados
+                        </div>
+                        <div class="pagination">
+                            <RadzenPager Count="@puntuacionesFiltradas.Count" 
+                                       PageSize="@elementosPorPagina"
+                                       PageNumbersCount="5"
+                                       CurrentPage="@(paginaActual - 1)"
+                                       PageChanged="@OnPageChanged"
+                                       ShowPagingSummary="true"
+                                       PagingSummaryFormat="Página {0} de {1} ({2} registros)"
+                                       Class="rz-pager-custom" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

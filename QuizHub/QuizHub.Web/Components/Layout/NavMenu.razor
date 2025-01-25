@@ -4,89 +4,90 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">QuizHub</a>
+<nav class="navbar">
+    <div class="navbar-brand">
+        <a href="">
+            <span class="brand-icon">?</span>
+            <span class="brand-text">QuizHub</span>
+        </a>
     </div>
-</div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
+    <div class="nav-content">
+        <div class="nav-links">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Inicio
+                <span class="bi bi-house-door-fill-nav-menu"></span> Inicio
             </NavLink>
+
+            @if (isAuthenticated && isProfesor)
+            {
+                @* 
+                <NavLink class="nav-link" href="preguntas">
+                    <span class="bi bi-plus-square-fill-nav-menu"></span> Preguntas
+                </NavLink>
+                *@
+                <NavLink class="nav-link" href="Asignaturas">
+                    <span class="bi bi-book-fill-nav-menu"></span> Asignaturas
+                </NavLink>
+                <NavLink class="nav-link" href="Cuestionarios">
+                    <span class="bi bi-file-text-fill-nav-menu"></span> Cuestionarios
+                </NavLink>
+                <NavLink class="nav-link" href="GestionAlumnos">
+                    <span class="bi bi-people-fill-nav-menu"></span> Administrar Alumnos
+                </NavLink>
+            }
+
+            @if (isAuthenticated && isAlumno)
+            {
+                <NavLink class="nav-link" href="preguntasAlumno">
+                    <span class="bi bi-pencil-fill-nav-menu"></span> Cuestionarios
+                </NavLink>
+                <NavLink class="nav-link" href="cuestionariosRealizados">
+                    <span class="bi bi-trophy-fill-nav-menu"></span> Mis Calificaciones
+                </NavLink>
+            }
         </div>
 
-        <!-- Solo mostrar "Preguntas" si está autenticado y es Profesor -->
-        @if (isAuthenticated && isProfesor)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="preguntas">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Preguntas
-                </NavLink>
-            </div>
-        }
+        <div class="auth-section">
+            <AuthorizeView>
+                <Authorized>
+                    <NavLink class="nav-link user-profile" href="Account/Manage">
+                        <span class="bi bi-person-fill-nav-menu"></span>
+                        @context.User.Identity?.Name
+                    </NavLink>
+                    <form action="Account/Logout" method="post" class="logout-form">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="Account/Login"/>
+                        <button type="submit" class="nav-link logout-button">
+                            <span class="bi bi-box-arrow-right-nav-menu"></span>
+                            Salir
+                        </button>
+                    </form>
+                </Authorized>
+                <NotAuthorized>
+                    <NavLink class="nav-link login-button" href="Account/Login">
+                        <span class="bi bi-box-arrow-in-right-nav-menu"></span>
+                        Login
+                    </NavLink>
+                    <NavLink class="nav-link register-button" href="Account/Register">
+                        <span class="bi bi-person-plus-nav-menu"></span>
+                        Registro
+                    </NavLink>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </div>
 
-        <!-- Solo mostrar "Asignaturas" si está autenticado y es Profesor -->
-        @if (isAuthenticated && isProfesor)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Asignaturas">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Asignaturas
-                </NavLink>
-            </div>
-        }
-
-        <!-- Solo mostrar "Cuestionarios" si está autenticado y es Profesor -->
-        @if (isAuthenticated && isProfesor)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Cuestionarios">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Cuestionarios
-                </NavLink>
-            </div>
-        }
-
-        <!-- Solo mostrar "Administrar Usuarios" si está autenticado y es Profesor -->
-        @if (isAuthenticated && isProfesor)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="AdministrarUsuarios">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Administrar Alumnos
-                </NavLink>
-            </div>
-        }
-
-        <!-- Solo mostrar "Cuestionarios (Alumno)" si está autenticado y es Alumno -->
-        @if (isAuthenticated && isAlumno)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="preguntasAlumno">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Cuestionarios
-                </NavLink>
-            </div>
-        }
-
-        <!-- Solo mostrar "Mis Calificaciones" si está autenticado y es Alumno -->
-        @if (isAuthenticated && isAlumno)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="cuestionariosRealizados">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Mis Calificaciones
-                </NavLink>
-            </div>
-        }
-    </nav>
-</div>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</nav>
 
 @code {
     private string? currentUrl;
     private bool isAuthenticated = false;
     private bool isProfesor = false;
     private bool isAlumno = false;
+    private bool collapseNavMenu = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -151,6 +152,11 @@
         // Actualizar la URL actual en cada cambio de ubicación
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
     }
 
     public void Dispose()
