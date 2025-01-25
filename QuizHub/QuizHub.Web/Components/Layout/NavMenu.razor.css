@@ -1,3 +1,240 @@
+.navbar {
+    background: white;
+    height: var(--navbar-height);
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Logo */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.brand-icon {
+    background: var(--primary-color);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transform: rotate(-10deg);
+    transition: all 0.3s ease;
+}
+
+.navbar-brand a:hover .brand-icon {
+    transform: rotate(5deg) scale(1.1);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.brand-text {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Enlaces de navegación */
+.nav-content {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Estilo para todos los NavLinks */
+::deep .nav-link {
+    color: var(--text-color) !important;
+    text-decoration: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    border: 1px solid transparent;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+::deep .nav-link:hover {
+    background: rgba(33, 150, 243, 0.08);
+    transform: translateY(-1px);
+    color: var(--primary-color) !important;
+    border-color: rgba(33, 150, 243, 0.1);
+}
+
+::deep .nav-link.active {
+    background: rgba(33, 150, 243, 0.1);
+    color: var(--primary-color) !important;
+    border-color: rgba(33, 150, 243, 0.2);
+    font-weight: 600;
+}
+
+/* Estilos específicos para la sección de autenticación */
+.auth-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-left: 1.5rem;
+    border-left: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Estilo para el perfil de usuario */
+::deep .user-profile {
+    background: rgba(33, 150, 243, 0.08);
+    color: var(--primary-color) !important;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(33, 150, 243, 0.1);
+    line-height: 1.2;
+}
+
+::deep .user-profile:hover {
+    background: rgba(33, 150, 243, 0.12);
+    transform: translateY(-1px);
+    border-color: rgba(33, 150, 243, 0.2);
+}
+
+/* Estilo para el botón de logout */
+.logout-button {
+    background: rgba(220, 53, 69, 0.08);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.1);
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.logout-button:hover {
+    background: rgba(220, 53, 69, 0.12);
+    transform: translateY(-1px);
+    border-color: rgba(220, 53, 69, 0.2);
+}
+
+/* Estilos para los iconos */
+::deep .bi {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+::deep .nav-link:hover .bi {
+    transform: scale(1.1);
+}
+
+/* Estilos específicos para login/register */
+::deep .login-button {
+    background: rgba(33, 150, 243, 0.08);
+    border: 1px solid rgba(33, 150, 243, 0.1);
+}
+
+::deep .register-button {
+    background: var(--primary-color);
+    color: white !important;
+    border: 1px solid var(--primary-color);
+}
+
+::deep .register-button:hover {
+    background: var(--hover-color);
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .nav-content {
+        position: absolute;
+        top: var(--navbar-height);
+        left: 1rem;
+        right: 1rem;
+        background: white;
+        flex-direction: column;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        display: none;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .nav-content.show {
+        display: flex;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    ::deep .nav-link {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .auth-section {
+        flex-direction: column;
+        width: 100%;
+        border-left: none;
+        border-top: 2px solid rgba(0, 0, 0, 0.08);
+        padding: 1rem 0 0 0;
+        margin-top: 1rem;
+    }
+
+    ::deep .user-profile,
+    .logout-button,
+    ::deep .login-button,
+    ::deep .register-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .navbar-toggler {
     appearance: none;
     cursor: pointer;
@@ -18,20 +255,6 @@
 .top-row {
     height: 3.5rem;
     background-color: rgba(0,0,0,0.4);
-}
-
-.navbar-brand {
-    font-size: 1.1rem;
-}
-
-.bi {
-    display: inline-block;
-    position: relative;
-    width: 1.25rem;
-    height: 1.25rem;
-    margin-right: 0.75rem;
-    top: -1px;
-    background-size: cover;
 }
 
 .bi-house-door-fill-nav-menu {
@@ -123,3 +346,4 @@
         overflow-y: auto;
     }
 }
+

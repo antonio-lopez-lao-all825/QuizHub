@@ -1,179 +1,386 @@
 ﻿@page "/Asignaturas"
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
 @inject ApplicationDbContext db
 @inject IJSRuntime JSRuntime
 @inject UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>Asignaturas</PageTitle>
-
-<div class="row">
-    <div class="col-10">
-        <h1>Asignaturas</h1>
+<div class="subject-page">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-book-open"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Gestión de Asignaturas</h1>
+            <p>Administra las asignaturas del sistema</p>
+        </div>
     </div>
-    <div class="col-2 text-end">
-        <button class="btn btn-primary" @onclick="() => AbrirModalAgregarAsignatura()">Añadir Asignatura</button>
-    </div>
-</div>
 
-@if (asignaturas == null)
-{
-    <p><em>Cargando...</em></p>
-}
-else if (!asignaturas.Any())
-{
-    <p>No se encontraron asignaturas.</p>
-}
-else
-{
-    <table class="table mt-4">
-        <thead>
-            <tr>
-                <th>Nombre Asignatura</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var asignatura in asignaturas)
+    <div class="actions-bar">
+        <div class="search-input">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" 
+                   @bind-value="searchTerm" 
+                   @bind-value:event="oninput" 
+                   placeholder="Buscar asignaturas..." />
+        </div>
+        <button class="btn-add" @onclick="() => ShowCreateModal()">
+            <i class="fa-solid fa-plus"></i>
+            Nueva Asignatura
+        </button>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-button @(activeTab == "todas" ? "active" : "")" 
+                @onclick='() => CambiarTab("todas")'>
+            <i class="fa-solid fa-globe"></i>
+            Todas las Asignaturas
+        </button>
+        <button class="tab-button @(activeTab == "mias" ? "active" : "")" 
+                @onclick='() => CambiarTab("mias")'>
+            <i class="fa-solid fa-user-check"></i>
+            Mis Asignaturas
+        </button>
+    </div>
+
+    @if (asignaturas == null)
+    {
+        <div class="loading-state">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <p>Cargando asignaturas...</p>
+        </div>
+    }
+    else if (!asignaturasFiltradas.Any())
+    {
+        <div class="empty-state">
+            <i class="fa-solid fa-book"></i>
+            <p>No hay asignaturas @(activeTab == "todas" ? "todas" : "mias")</p>
+            <button class="btn-add" @onclick="() => ShowCreateModal()">
+                <i class="fa-solid fa-plus"></i>
+                Crear Primera Asignatura
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="subjects-grid">
+            @foreach (var asignatura in asignaturasPaginadas)
             {
-                <tr>
-                    <td>@asignatura.Name</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm me-1" @onclick="() => AbrirModalEditarAsignatura(asignatura)">Editar</button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarAsignatura(asignatura.Id)">Eliminar</button>
-                    </td>
-                </tr>
+                <div class="subject-card">
+                    <div class="subject-header">
+                        <div class="subject-icon">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                        <div class="subject-info">
+                            <h3>@asignatura.Name</h3>
+                            <span class="subject-status @(asignatura.Estado == 1 ? "active" : "inactive")">
+                                <i class="fa-solid @(asignatura.Estado == 1 ? "fa-check-circle" : "fa-times-circle")"></i>
+                                @(asignatura.Estado == 1 ? "Activa" : "Inactiva")
+                            </span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        @if (esAsignaturaPropia(asignatura.Id))
+                        {
+                            @if (asignatura.Estado == 1)
+                            {
+                                <button class="btn-deactivate" @onclick="() => DesactivarAsignatura(asignatura)">
+                                    <i class="fa-solid fa-ban"></i>
+                                    Deshabilitar
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-activate" @onclick="() => ActivarAsignatura(asignatura)">
+                                    <i class="fa-solid fa-check"></i>
+                                    Habilitar
+                                </button>
+                            }
+                            <button class="btn-delete" @onclick="() => DeleteAsignatura(asignatura)">
+                                <i class="fa-solid fa-trash"></i>
+                                Eliminar
+                            </button>
+                        }
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+
+        @if (asignaturasFiltradas.Any())
+        {
+            <div class="pagination">
+                <button class="btn-page" 
+                        @onclick="() => ChangePage(currentPage - 1)" 
+                        disabled="@(currentPage == 1)">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    var pageNumber = i;
+                    <button class="btn-page @(pageNumber == currentPage ? "active" : "")" 
+                            @onclick="() => ChangePage(pageNumber)">
+                        @i
+                    </button>
+                }
+
+                <button class="btn-page" 
+                        @onclick="() => ChangePage(currentPage + 1)" 
+                        disabled="@(currentPage == totalPages)">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        }
+    }
+</div>
+
+@if (showAddModal)
+{
+    <div class="modal-backdrop" @onclick="CerrarModal"></div>
+    <div class="modal-dialog modal-sm" @onclick:stopPropagation="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="header-content">
+                    <i class="fa-solid fa-plus"></i>
+                    <h3>Nueva Asignatura</h3>
+                </div>
+                <button class="btn-close" @onclick="CerrarModal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nombre de la Asignatura</label>
+                    <input type="text" 
+                           value="@nombreAsignatura"
+                           @oninput="OnInputChange"
+                           class="@(nombreRepetido ? "error" : "")"
+                           placeholder="Ej: Matemáticas" />
+                    @if (nombreRepetido)
+                    {
+                        <div class="input-error">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            Ya existe una asignatura con este nombre
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" @onclick="CerrarModal">
+                    <i class="fa-solid fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn-confirm" @onclick="AgregarAsignatura">
+                    <i class="fa-solid fa-plus"></i>
+                    Crear
+                </button>
+            </div>
+        </div>
+    </div>
 }
 
-<!-- Modal para agregar una asignatura -->
-<div class="modal fade" id="agregarAsignaturaModal" tabindex="-1" aria-labelledby="agregarAsignaturaModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+@if (showEditModal)
+{
+    <div class="modal-backdrop" @onclick="CerrarModal"></div>
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="agregarAsignaturaModalLabel">Añadir Asignatura</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="header-content">
+                    <i class="fa-solid fa-edit"></i>
+                    <h3>Editar Asignatura</h3>
+                </div>
+                <button class="btn-close" @onclick="CerrarModal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
-                <label for="asignaturaName">Nombre de la Asignatura:</label>
-                <InputText id="asignaturaName" @bind-Value="nombreAsignatura" class="form-control" required />
-                <button class="btn btn-primary w-100 mt-3" @onclick="() => AgregarAsignatura()">Añadir Asignatura</button>
+                <div class="form-group">
+                    <label>Nombre de la Asignatura</label>
+                    <input type="text" @bind="nombreAsignatura" 
+                           placeholder="Nuevo nombre"
+                           @onkeyup="@(e => { if (e.Key == "Enter") { EditarAsignatura(); }})" />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" @onclick="CerrarModal">
+                        <i class="fa-solid fa-times"></i>
+                        Cancelar
+                    </button>
+                    <button class="btn-confirm" @onclick="EditarAsignatura">
+                        <i class="fa-solid fa-save"></i>
+                        Guardar Cambios
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
 
-<!-- Modal para editar una asignatura -->
-<div class="modal fade" id="editarAsignaturaModal" tabindex="-1" aria-labelledby="editarAsignaturaModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="editarAsignaturaModalLabel">Editar Asignatura</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <label for="editarAsignaturaName">Nuevo Nombre de la Asignatura:</label>
-                <InputText id="editarAsignaturaName" @bind-Value="nombreAsignatura" class="form-control" required />
-                <button class="btn btn-warning w-100 mt-3" @onclick="() => EditarAsignatura()">Guardar Cambios</button>
-            </div>
+@if (showErrorToast)
+{
+    <div class="toast-container">
+        <div class="toast error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>@errorMessage</span>
         </div>
     </div>
-</div>
+}
 
 @code {
     private List<Asignatura> asignaturas = new();
     private string nombreAsignatura = string.Empty;
     private Asignatura asignaturaAEditar;
+    private bool showAddModal;
+    private bool showEditModal;
+    private string currentUserId;
+    private HashSet<int> asignaturasPropiasIds = new();
+    private string searchTerm = string.Empty;
+    private string activeTab = "todas";
+    private int currentPage = 1;
+    private int pageSize = 6;
+    private bool showErrorToast = false;
+    private string errorMessage = string.Empty;
+    private bool nombreRepetido = false;
+
+    private List<Asignatura> asignaturasFiltradas => asignaturas
+        .Where(a => (activeTab == "todas" || (activeTab == "mias" && esAsignaturaPropia(a.Id))))
+        .Where(a => string.IsNullOrEmpty(searchTerm) ||
+                    a.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    private List<Asignatura> asignaturasPaginadas => asignaturasFiltradas
+        .Skip((currentPage - 1) * pageSize)
+        .Take(pageSize)
+        .ToList();
+
+    private int totalPages => (int)Math.Ceiling(asignaturasFiltradas.Count / (double)pageSize);
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (!user.Identity.IsAuthenticated)
-        {
-            Console.WriteLine("Usuario no autenticado.");
-            return;
-        }
-
-        var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userId))
-        {
-            Console.WriteLine("No se encontró el ID del usuario.");
-            return;
-        }
-
-        asignaturas = await db.asignaturas
-            .Where(a => db.asignaturasUsuario.Any(au => au.IdAsignatura == a.Id && au.IdUsuario == userId))
-            .ToListAsync();
+        await CargarDatos();
     }
 
-    private void AbrirModalAgregarAsignatura()
+    private async Task CargarDatos()
+    {
+        // Cargar todas las asignaturas
+        asignaturas = await db.asignaturas.ToListAsync();
+
+        // Obtener IDs de asignaturas creadas por el profesor actual
+        var asignaturasIds = await db.asignaturasUsuario
+            .Where(au => au.IdUsuario == currentUserId)
+            .Select(au => au.IdAsignatura)
+            .ToListAsync();
+        
+        asignaturasPropiasIds = new HashSet<int>(asignaturasIds);
+    }
+
+    private void CambiarTab(string tab)
+    {
+        activeTab = tab;
+        currentPage = 1;
+        searchTerm = "";
+        StateHasChanged();
+    }
+
+    private void ChangePage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+        }
+    }
+
+    private void ShowCreateModal()
     {
         nombreAsignatura = string.Empty;
-        JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('agregarAsignaturaModal')).show();");
+        showAddModal = true;
+        StateHasChanged();
+    }
+
+    private async Task ShowErrorToast(string message)
+    {
+        errorMessage = message;
+        showErrorToast = true;
+        await Task.Delay(3000);
+        showErrorToast = false;
+        StateHasChanged();
+    }
+
+    private async Task OnInputChange(ChangeEventArgs e)
+    {
+        nombreAsignatura = e.Value?.ToString() ?? "";
+        
+        if (!string.IsNullOrEmpty(nombreAsignatura))
+        {
+            nombreRepetido = await db.asignaturas
+                .AnyAsync(a => a.Name.ToLower() == nombreAsignatura.ToLower());
+        }
+        else
+        {
+            nombreRepetido = false;
+        }
     }
 
     private async Task AgregarAsignatura()
     {
-        if (!string.IsNullOrEmpty(nombreAsignatura))
+        if (string.IsNullOrEmpty(nombreAsignatura))
         {
-            try
+            return;
+        }
+
+        if (nombreRepetido)
+        {
+            return;
+        }
+
+        try
+        {
+            // Crear la asignatura
+            var nuevaAsignatura = new Asignatura 
+            { 
+                Name = nombreAsignatura,
+                Estado = 1
+            };
+            
+            db.asignaturas.Add(nuevaAsignatura);
+            await db.SaveChangesAsync();
+
+            // Crear la relación con el usuario
+            var asignaturaUsuario = new AsignaturasUsuario
             {
-                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-                var user = authState.User;
+                IdAsignatura = nuevaAsignatura.Id,
+                IdUsuario = currentUserId
+            };
 
-                if (!user.Identity.IsAuthenticated)
-                {
-                    Console.WriteLine("Usuario no autenticado.");
-                    return;
-                }
+            db.asignaturasUsuario.Add(asignaturaUsuario);
+            await db.SaveChangesAsync();
 
-                var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    Console.WriteLine("No se encontró el ID del usuario.");
-                    return;
-                }
-
-                var nuevaAsignatura = new Asignatura { Name = nombreAsignatura };
-                await db.asignaturas.AddAsync(nuevaAsignatura);
-                await db.SaveChangesAsync();
-
-                var asignaturaUsuario = new AsignaturasUsuario
-                    {
-                        IdAsignatura = nuevaAsignatura.Id,
-                        IdUsuario = userId
-                    };
-
-                await db.asignaturasUsuario.AddAsync(asignaturaUsuario);
-                await db.SaveChangesAsync();
-
-                asignaturas.Add(nuevaAsignatura);
-                StateHasChanged();
-
-                await JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('agregarAsignaturaModal')).hide();");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al agregar asignatura: {ex.Message}");
-            }
+            await CargarDatos();
+            nombreAsignatura = string.Empty;
+            showAddModal = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al crear la asignatura: {ex.Message}");
         }
     }
 
-    private void AbrirModalEditarAsignatura(Asignatura asignatura)
+    private void ShowEditModal(Asignatura asignatura)
     {
         asignaturaAEditar = asignatura;
         nombreAsignatura = asignatura.Name;
-        JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('editarAsignaturaModal')).show();");
+        showEditModal = true;
     }
 
     private async Task EditarAsignatura()
     {
-        if (!string.IsNullOrEmpty(nombreAsignatura) && asignaturaAEditar != null)
+        if (!string.IsNullOrEmpty(nombreAsignatura) && asignaturaAEditar != null && esAsignaturaPropia(asignaturaAEditar.Id))
         {
             try
             {
@@ -182,9 +389,8 @@ else
                 await db.SaveChangesAsync();
 
                 asignaturas = await db.asignaturas.ToListAsync();
+                showEditModal = false;
                 StateHasChanged();
-
-                await JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('editarAsignaturaModal')).hide();");
             }
             catch (Exception ex)
             {
@@ -193,23 +399,63 @@ else
         }
     }
 
-    private async Task EliminarAsignatura(int id)
+    private async Task DeleteAsignatura(Asignatura asignatura)
     {
+        if (!esAsignaturaPropia(asignatura.Id)) return;
+
         try
         {
-            var asignatura = await db.asignaturas.FindAsync(id);
-            if (asignatura != null)
+            // Primero eliminar la relación en asignaturasUsuario
+            var asignaturaUsuario = await db.asignaturasUsuario
+                .FirstOrDefaultAsync(au => au.IdAsignatura == asignatura.Id && au.IdUsuario == currentUserId);
+            
+            if (asignaturaUsuario != null)
             {
-                db.asignaturas.Remove(asignatura);
+                db.asignaturasUsuario.Remove(asignaturaUsuario);
                 await db.SaveChangesAsync();
-
-                asignaturas.RemoveAll(a => a.Id == id);
-                StateHasChanged();
             }
+
+            db.asignaturas.Remove(asignatura);
+            await db.SaveChangesAsync();
+
+            asignaturas = await db.asignaturas.ToListAsync();
+            asignaturasPropiasIds.Remove(asignatura.Id);
+            StateHasChanged();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al eliminar asignatura: {ex.Message}");
+        }
+    }
+
+    private void CerrarModal()
+    {
+        showAddModal = false;
+        showEditModal = false;
+    }
+
+    private bool esAsignaturaPropia(int asignaturaId)
+    {
+        return asignaturasPropiasIds.Contains(asignaturaId);
+    }
+
+    private async Task DesactivarAsignatura(Asignatura asignatura)
+    {
+        if (asignatura != null && esAsignaturaPropia(asignatura.Id))
+        {
+            asignatura.Estado = 0;
+            await db.SaveChangesAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task ActivarAsignatura(Asignatura asignatura)
+    {
+        if (asignatura != null && esAsignaturaPropia(asignatura.Id))
+        {
+            asignatura.Estado = 1;
+            await db.SaveChangesAsync();
+            StateHasChanged();
         }
     }
 }

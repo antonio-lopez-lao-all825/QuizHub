@@ -1,24 +1,198 @@
 ﻿@page "/preguntasAlumno"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
-@inject ApplicationDbContext DbContext
 
-<h3>Cuestionarios Disponibles</h3>
+<div class="cuestionarios-page">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-book-open"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Cuestionarios Disponibles</h1>
+            <p>Explora y realiza cuestionarios para poner a prueba tus conocimientos</p>
+        </div>
+    </div>
 
-<div class="cuestionarios-container">
-    @if (cuestionarios != null && cuestionarios.Any())
-    {
-        foreach (var cuestionario in cuestionarios)
+    <div class="filters-section">
+        <div class="filter-group">
+            <div class="filter-dropdown">
+                <RadzenDropDown Data="@(new[] { "Todas las asignaturas" }.Concat(asignaturasUnicas))" 
+                              @bind-Value="@filtroAsignatura"
+                              Change="@FiltrarCuestionarios"
+                              Class="rz-dropdown-custom" />
+            </div>
+            <div class="search-box">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" 
+                       @bind="searchTerm" 
+                       @bind:event="oninput" 
+                       @onkeyup="FiltrarCuestionarios" 
+                       placeholder="Buscar cuestionarios..." />
+            </div>
+        </div>
+        <div class="filter-buttons">
+            <button class="filter-btn @(showAll ? "active" : "")" @onclick="() => FilterByStatus(true)">
+                <i class="fa-solid fa-list"></i>
+                Todos
+            </button>
+            <button class="filter-btn @(!showAll ? "active" : "")" @onclick="() => FilterByStatus(false)">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                Pendientes
+            </button>
+        </div>
+    </div>
+
+    <div class="cuestionarios-grid">
+        <div class="section-title">
+            <i class="fa-solid fa-star"></i>
+            <h2>Cuestionarios encontrados</h2>
+        </div>
+        @if (!GetCuestionariosPaginados().Any())
         {
-            <div class="cuestionario-card" @onclick="() => NavegarACuestionario(cuestionario.Id)">
-                <h4>@cuestionario.Name</h4>
-                <p><strong>Asignatura:</strong> @cuestionario.Asignatura</p>
-                <p><strong>Estado:</strong> @(cuestionario.Estado == 1 ? "Activo" : "Inactivo")</p>
+            <div class="empty-state">
+                <i class="fa-solid fa-clipboard-list"></i>
+                <p>No hay cuestionarios disponibles</p>
+                <span>Vuelve más tarde para ver nuevos cuestionarios</span>
             </div>
         }
-    }
-    else
+        else
+        {
+            <div class="cards-grid">
+                @foreach (var cuestionario in GetCuestionariosPaginados())
+                {
+                    <div class="cuestionario-card @(HasCompletedCuestionario(cuestionario.Id) ? "completed" : "")">
+                        <div class="card-status">
+                            @if (HasCompletedCuestionario(cuestionario.Id))
+                            {
+                                <i class="fa-solid fa-check-circle"></i>
+                                <span>Completado</span>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-hourglass-half"></i>
+                                <span>Pendiente</span>
+                            }
+                        </div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <div class="subject-badge">
+                                    <i class="fa-solid fa-book"></i>
+                                    @cuestionario.Asignatura
+                                </div>
+                                <h3>@cuestionario.Name</h3>
+                            </div>
+                            <div class="card-stats">
+                                <div class="stat">
+                                    <i class="fa-solid fa-users"></i>
+                                    <span>@GetCompletionCount(cuestionario.Id) realizaciones</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fa-solid fa-trophy"></i>
+                                    <span class="score-value">@GetAverageScore(cuestionario.Id)<span class="score-total">/10</span></span>
+                                </div>
+                            </div>
+                            <button class="action-button" @onclick="() => NavigateToQuiz(cuestionario.Id)">
+                                @if (HasCompletedCuestionario(cuestionario.Id))
+                                {
+                                    <span>Ver resultado</span>
+                                    <i class="fa-solid fa-chart-line"></i>
+                                }
+                                else
+                                {
+                                    <span>Comenzar</span>
+                                    <i class="fa-solid fa-play"></i>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (cuestionariosFiltrados.Count > elementosPorPagina)
+            {
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Mostrando @(((paginaActual - 1) * elementosPorPagina) + 1) - @(Math.Min(paginaActual * elementosPorPagina, cuestionariosFiltrados.Count)) de @cuestionariosFiltrados.Count cuestionarios
+                    </div>
+                    <div class="pagination">
+                        <RadzenPager Count="@cuestionariosFiltrados.Count" 
+                                   PageSize="@elementosPorPagina"
+                                   PageNumbersCount="5"
+                                   CurrentPage="@(paginaActual - 1)"
+                                   PageChanged="@OnPageChanged"
+                                   ShowPagingSummary="true"
+                                   PagingSummaryFormat="Página {0} de {1}"
+                                   Class="rz-pager-custom" />
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    @if (completedCuestionarios.Any())
     {
-        <p>No hay cuestionarios disponibles.</p>
+        <div class="cuestionarios-grid completed-section">
+            <div class="section-title">
+                <i class="fa-solid fa-check-double"></i>
+                <h2>Cuestionarios completados</h2>
+            </div>
+            <div class="cards-grid">
+                @foreach (var cuestionario in GetCompletedCuestionariosPaginados())
+                {
+                    <div class="cuestionario-card completed">
+                        <div class="card-status">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <span>Completado</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <div class="subject-badge">
+                                    <i class="fa-solid fa-book"></i>
+                                    @cuestionario.Asignatura
+                                </div>
+                                <h3>@cuestionario.Name</h3>
+                            </div>
+                            <div class="card-stats">
+                                <div class="stat">
+                                    <i class="fa-solid fa-trophy"></i>
+                                    <span class="score-value">@GetUserScore(cuestionario.Id)<span class="score-total">/10</span></span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                    <span class="score-value">Media: @GetAverageScore(cuestionario.Id)<span class="score-total">/10</span></span>
+                                </div>
+                            </div>
+                            <button class="action-button view-results" @onclick="() => NavigateToQuiz(cuestionario.Id)">
+                                <span>Ver resultado</span>
+                                <i class="fa-solid fa-chart-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (completedCuestionarios.Count > elementosPorPagina)
+            {
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Mostrando @(((paginaCompletados - 1) * elementosPorPagina) + 1) - @(Math.Min(paginaCompletados * elementosPorPagina, completedCuestionarios.Count)) de @completedCuestionarios.Count completados
+                    </div>
+                    <div class="pagination">
+                        <RadzenPager Count="@completedCuestionarios.Count" 
+                                   PageSize="@elementosPorPagina"
+                                   PageNumbersCount="5"
+                                   CurrentPage="@(paginaCompletados - 1)"
+                                   PageChanged="@OnCompletedPageChanged"
+                                   ShowPagingSummary="true"
+                                   PagingSummaryFormat="Página {0} de {1}"
+                                   Class="rz-pager-custom" />
+                    </div>
+                </div>
+            }
+        </div>
     }
 </div>
 

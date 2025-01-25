@@ -1,0 +1,1096 @@
+@page "/Cuestionarios"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@inject ApplicationDbContext db
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+
+<div class="quiz-page">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-clipboard-question"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Gestión de Cuestionarios</h1>
+            <p>Crea y administra tus cuestionarios</p>
+        </div>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-button @(activeTab == "todos" ? "active" : "")" 
+                @onclick='() => CambiarTab("todos")'>
+            <i class="fa-solid fa-globe"></i>
+            Todos los Cuestionarios
+        </button>
+        <button class="tab-button @(activeTab == "mios" ? "active" : "")" 
+                @onclick='() => CambiarTab("mios")'>
+            <i class="fa-solid fa-user-check"></i>
+            Mis Cuestionarios
+        </button>
+    </div>
+
+    <div class="actions-bar">
+        <div class="search-input">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" 
+                   @bind-value="searchTerm" 
+                   @bind-value:event="oninput" 
+                   placeholder="Buscar cuestionarios..." />
+        </div>
+        @if (activeTab == "mios")
+        {
+            <button class="btn-add" @onclick="AbrirModalCrearCuestionario">
+                <i class="fa-solid fa-plus"></i>
+                Nuevo Cuestionario
+            </button>
+        }
+    </div>
+
+    @if (cuestionarios == null)
+    {
+        <div class="loading-state">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <p>Cargando cuestionarios...</p>
+        </div>
+    }
+    else if (!cuestionariosFiltrados.Any())
+    {
+        <div class="empty-state">
+            <i class="fa-solid fa-clipboard-question"></i>
+            <p>No hay cuestionarios creados</p>
+            <button class="btn-add" @onclick="AbrirModalCrearCuestionario">
+                <i class="fa-solid fa-plus"></i>
+                Crear Primer Cuestionario
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="quizzes-grid">
+            @foreach (var cuestionario in cuestionariosFiltradosPaginados)
+            {
+                <div class="quiz-card @(EsCuestionarioPropio(cuestionario.IdUsuario) ? "own-quiz" : "")">
+                    <div class="quiz-header">
+                        <div class="quiz-icon">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                        </div>
+                        <div class="quiz-info">
+                            <h3>@cuestionario.Name</h3>
+                            <span class="quiz-subject">
+                                <i class="fa-solid fa-book-open"></i>
+                                @cuestionario.Asignatura
+                            </span>
+                        </div>
+                    </div>
+                    <div class="quiz-stats">
+                        <div class="stat">
+                            <i class="fa-solid fa-question"></i>
+                            <span>@ObtenerNumeroPreguntasCuestionario(cuestionario.Id) preguntas</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fa-solid fa-pencil"></i>
+                            <span>@numeroIntentosPorCuestionario.GetValueOrDefault(cuestionario.Id, 0) intentos</span>
+                        </div>
+                        @if (promedioPorCuestionario.ContainsKey(cuestionario.Id))
+                        {
+                            <div class="stat">
+                                <i class="fa-solid fa-star"></i>
+                                <span>@promedioPorCuestionario[cuestionario.Id] promedio</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="action-buttons">
+                        @if (EsCuestionarioPropio(cuestionario.IdUsuario))
+                        {
+                            <button class="btn-edit" @onclick="() => EditarCuestionario(cuestionario)">
+                                <i class="fa-solid fa-pen"></i>
+                                Editar
+                            </button>
+                            <button class="btn-delete" @onclick="() => EliminarCuestionario(cuestionario.Id)">
+                                <i class="fa-solid fa-trash"></i>
+                                Eliminar
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn-view" @onclick="() => VerCuestionario(cuestionario)">
+                                <i class="fa-solid fa-eye"></i>
+                                Ver Detalles
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (cuestionariosFiltrados.Any())
+        {
+            <div class="pagination">
+                <button class="btn-page" 
+                        @onclick="() => ChangePage(currentPages[activeTab] - 1)" 
+                        disabled="@(currentPages[activeTab] == 1)">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    var pageNumber = i;
+                    <button class="btn-page @(pageNumber == currentPages[activeTab] ? "active" : "")" 
+                            @onclick="() => ChangePage(pageNumber)">
+                        @i
+                    </button>
+                }
+
+                <button class="btn-page" 
+                        @onclick="() => ChangePage(currentPages[activeTab] + 1)" 
+                        disabled="@(currentPages[activeTab] == totalPages)">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        }
+    }
+
+    @if (showSuccessToast)
+    {
+        <div class="toast-container">
+            <div class="toast success">
+                <i class="fa-solid fa-check-circle"></i>
+                <span>@toastMessage</span>
+            </div>
+        </div>
+    }
+</div>
+
+@if (showCrearModal)
+{
+    <div class="modal-backdrop" @onclick="CerrarModal"></div>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="header-content">
+                    <i class="fa-solid fa-plus"></i>
+                    <h3>Nuevo Cuestionario</h3>
+                </div>
+                <button class="btn-close" @onclick="CerrarModal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="quiz-form">
+                    <div class="form-section">
+                        <h4>Información General</h4>
+                        <div class="form-group">
+                            <label>Nombre del Cuestionario</label>
+                            <input type="text" 
+                                   value="@nombreCuestionario"
+                                   @oninput="OnNombreCuestionarioChange"
+                                   class="@(nombreRepetido ? "error" : "")"
+                                   placeholder="Ej: Examen Parcial 1" />
+                            @if (nombreRepetido)
+                            {
+                                <div class="input-error">
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                    Ya existe un cuestionario con este nombre
+                                </div>
+                            }
+                        </div>
+                        <div class="form-group">
+                            <label>Asignatura</label>
+                            <select @bind="asignaturaSeleccionada" class="form-select">
+                                <option value="">Seleccione una asignatura</option>
+                                @foreach (var asignatura in asignaturasAsignadasAlUsuario)
+                                {
+                                    <option value="@asignatura.Name">@asignatura.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h4>Preguntas</h4>
+                            <button class="btn-add-small" @onclick="AgregarNuevaPregunta">
+                                <i class="fa-solid fa-plus"></i>
+                                Añadir Pregunta
+                            </button>
+                        </div>
+
+                        @foreach (var (pregunta, indexPregunta) in preguntasNuevas.Select((p, i) => (p, i)))
+                        {
+                            <div class="question-card">
+                                <div class="question-header">
+                                    <span class="question-number">Pregunta @(indexPregunta + 1)</span>
+                                    <button class="btn-remove" @onclick="() => EliminarPregunta(indexPregunta)">
+                                        <i class="fa-solid fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" @bind="pregunta.Name" 
+                                           placeholder="Escriba la pregunta aquí" />
+                                </div>
+
+                                <div class="answers-section">
+                                    <div class="answers-header">
+                                        <span>Respuestas</span>
+                                        <button class="btn-add-small" 
+                                                @onclick="() => AgregarRespuesta(indexPregunta)">
+                                            <i class="fa-solid fa-plus"></i>
+                                            Añadir Respuesta
+                                        </button>
+                                    </div>
+
+                                    @foreach (var (respuesta, indexRespuesta) in pregunta.Respuestas.Select((r, i) => (r, i)))
+                                    {
+                                        <div class="answer-item">
+                                            <div class="form-check">
+                                                <input type="radio" 
+                                                       class="form-check-input" 
+                                                       name="correcta_@indexPregunta"
+                                                       checked="@respuesta.Correcta"
+                                                       @onchange="() => MarcarRespuestaCorrecta(indexPregunta, indexRespuesta)" />
+                                            </div>
+                                            <input type="text" 
+                                                   @bind="respuesta.Texto" 
+                                                   placeholder="Escriba la respuesta aquí" />
+                                            <button class="btn-remove-small" 
+                                                    @onclick="() => EliminarRespuesta(indexPregunta, indexRespuesta)">
+                                                <i class="fa-solid fa-times"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" @onclick="CerrarModal">
+                    <i class="fa-solid fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn-confirm" @onclick="GuardarCuestionario">
+                    <i class="fa-solid fa-save"></i>
+                    Guardar Cuestionario
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showVerModal && cuestionarioSeleccionado != null)
+{
+    <div class="modal-backdrop" @onclick="CerrarModal"></div>
+    <div class="modal-dialog modal-lg" @onclick:stopPropagation="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="header-content">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <h3>@cuestionarioSeleccionado.Name</h3>
+                </div>
+                <button class="btn-close" @onclick="CerrarModal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="quiz-details">
+                    <div class="quiz-info-header">
+                        <div class="info-item">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>@cuestionarioSeleccionado.Asignatura</span>
+                        </div>
+                    </div>
+
+                    <div class="questions-list">
+                        @if (preguntasDelCuestionario != null && preguntasDelCuestionario.Any())
+                        {
+                            @foreach (var (pregunta, index) in preguntasDelCuestionario.Select((p, i) => (p, i + 1)))
+                            {
+                                <div class="question-item">
+                                    <div class="question-header">
+                                        <span class="question-number">Pregunta @index</span>
+                                        <span class="question-text">@pregunta.Name</span>
+                                    </div>
+                                    @if (respuestasPorPregunta.ContainsKey(pregunta.Id))
+                                    {
+                                        <div class="answers-list">
+                                            @foreach (var respuesta in respuestasPorPregunta[pregunta.Id])
+                                            {
+                                                <div class="answer-item @(respuesta.Correcta.GetValueOrDefault() ? "correct" : "")">
+                                                    <i class="fa-solid @(respuesta.Correcta.GetValueOrDefault() ? "fa-check" : "fa-circle")"></i>
+                                                    <span>@respuesta.Texto</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <p>No hay preguntas en este cuestionario.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showConfirmModal)
+{
+    <div class="modal-backdrop" @onclick="CerrarModal"></div>
+    <div class="modal-dialog modal-sm" @onclick:stopPropagation="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="header-content">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <h3>Confirmar Eliminación</h3>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar este cuestionario?</p>
+                <p class="text-muted">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" @onclick="CerrarModal">
+                    <i class="fa-solid fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn-delete" @onclick="ConfirmarEliminarCuestionario">
+                    <i class="fa-solid fa-trash"></i>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showEditModal)
+{
+    <div class="modal-backdrop" @onclick="CerrarModal"></div>
+    <div class="modal-dialog modal-lg" @onclick:stopPropagation="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="header-content">
+                    <i class="fa-solid fa-edit"></i>
+                    <h3>Editar Cuestionario</h3>
+                </div>
+                <button class="btn-close" @onclick="CerrarModal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="quiz-form">
+                    <div class="form-section">
+                        <h4>Información General</h4>
+                        <div class="form-group">
+                            <label>Nombre del Cuestionario</label>
+                            <input type="text" @bind="nombreCuestionarioEdicion" />
+                        </div>
+                        <div class="form-group">
+                            <label>Asignatura</label>
+                            <select @bind="asignaturaSeleccionadaEdicion" class="form-select">
+                                <option value="">Seleccione una asignatura</option>
+                                @foreach (var asignatura in asignaturasAsignadasAlUsuario)
+                                {
+                                    <option value="@asignatura.Name">@asignatura.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h4>Preguntas</h4>
+                            <button class="btn-add-small" @onclick="() => preguntasEdicion.Add(new PreguntaConRespuestas())">
+                                <i class="fa-solid fa-plus"></i>
+                                Añadir Pregunta
+                            </button>
+                        </div>
+
+                        @foreach (var (pregunta, indexPregunta) in preguntasEdicion.Select((p, i) => (p, i)))
+                        {
+                            <div class="question-card">
+                                <div class="question-header">
+                                    <span class="question-number">Pregunta @(indexPregunta + 1)</span>
+                                    <button class="btn-remove" @onclick="() => preguntasEdicion.RemoveAt(indexPregunta)">
+                                        <i class="fa-solid fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" @bind="pregunta.Name" 
+                                           placeholder="Escriba la pregunta aquí" />
+                                </div>
+
+                                <div class="answers-section">
+                                    <div class="answers-header">
+                                        <span>Respuestas</span>
+                                        <button class="btn-add-small" 
+                                                @onclick="() => pregunta.Respuestas.Add(new RespuestaNueva())">
+                                            <i class="fa-solid fa-plus"></i>
+                                            Añadir Respuesta
+                                        </button>
+                                    </div>
+
+                                    @foreach (var (respuesta, indexRespuesta) in pregunta.Respuestas.Select((r, i) => (r, i)))
+                                    {
+                                        <div class="answer-item">
+                                            <div class="form-check">
+                                                <input type="radio" 
+                                                       class="form-check-input" 
+                                                       name="correcta_edit_@indexPregunta"
+                                                       checked="@respuesta.Correcta"
+                                                       @onchange="() => MarcarRespuestaCorrectaEdicion(indexPregunta, indexRespuesta)" />
+                                            </div>
+                                            <input type="text" 
+                                                   @bind="respuesta.Texto" 
+                                                   placeholder="Escriba la respuesta aquí" />
+                                            <button class="btn-remove-small" 
+                                                    @onclick="() => pregunta.Respuestas.RemoveAt(indexRespuesta)">
+                                                <i class="fa-solid fa-times"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" @onclick="CerrarModal">
+                    <i class="fa-solid fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn-confirm" @onclick="GuardarEdicionCuestionario">
+                    <i class="fa-solid fa-save"></i>
+                    Guardar como Nueva Versión
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Cuestionario> cuestionarios = new();
+    private List<Asignatura> asignaturasAsignadasAlUsuario = new();
+    private string nombreCuestionario = string.Empty;
+    private string asignaturaSeleccionada = string.Empty;
+    private bool showCrearModal;
+    private bool showEditModal;
+    private bool showVerModal;
+    private string currentUserId;
+    private Cuestionario cuestionarioSeleccionado;
+    private List<Pregunta> preguntasDelCuestionario;
+    private Dictionary<int, List<Respuesta>> respuestasPorPregunta = new();
+    private Dictionary<int, int> numeroPreguntasPorCuestionario = new();
+    private Dictionary<string, string> nombresProfesores = new();
+    private Dictionary<int, int> numeroIntentosPorCuestionario = new();
+    private Dictionary<int, double> promedioPorCuestionario = new();
+    private bool showConfirmModal;
+    private int cuestionarioIdAEliminar;
+    private List<PreguntaConRespuestas> preguntasNuevas = new();
+    private List<PreguntaConRespuestas> preguntasEdicion = new();
+    private string nombreCuestionarioEdicion = string.Empty;
+    private string asignaturaSeleccionadaEdicion = string.Empty;
+    private string searchTerm = "";
+    private int currentPage = 1;
+    private int pageSize = 6;
+    private bool showSuccessToast = false;
+    private string toastMessage = "";
+    private string activeTab = "todos";
+    private Dictionary<string, int> currentPages = new() 
+    {
+        { "todos", 1 },
+        { "mios", 1 }
+    };
+    private bool nombreRepetido = false;
+
+    private List<Cuestionario> cuestionariosFiltrados => cuestionarios
+        .Where(c => activeTab == "todos" || (activeTab == "mios" && EsCuestionarioPropio(c.IdUsuario)))
+        .Where(c => string.IsNullOrEmpty(searchTerm) ||
+                    c.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    c.Asignatura.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    private List<Cuestionario> cuestionariosFiltradosPaginados => cuestionariosFiltrados
+        .Skip((currentPages[activeTab] - 1) * pageSize)
+        .Take(pageSize)
+        .ToList();
+
+    private int totalPages => (int)Math.Ceiling(cuestionariosFiltrados.Count / (double)pageSize);
+
+    private void ChangePage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPages[activeTab] = page;
+        }
+    }
+
+    private async Task ShowToast(string message)
+    {
+        toastMessage = message;
+        showSuccessToast = true;
+        await Task.Delay(3000);
+        showSuccessToast = false;
+        StateHasChanged();
+    }
+
+    // Clase para manejar preguntas nuevas con sus respuestas
+    private class PreguntaConRespuestas
+    {
+        public string Name { get; set; } = string.Empty;
+        public List<RespuestaNueva> Respuestas { get; set; } = new();
+    }
+
+    private class RespuestaNueva
+    {
+        public string Texto { get; set; } = string.Empty;
+        public bool Correcta { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+                currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                Console.WriteLine($"Usuario autenticado con ID: {currentUserId}");
+                
+                if (!string.IsNullOrEmpty(currentUserId))
+                {
+                    await CargarDatos();
+                }
+                else
+                {
+                    Console.WriteLine("No se pudo obtener el ID del usuario");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Usuario no autenticado");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error en OnInitializedAsync: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task CargarDatos()
+    {
+        try
+        {
+            // 1. Primero cargamos los cuestionarios
+            cuestionarios = await db.cuestionarios
+                .OrderByDescending(c => c.Id)
+                .ToListAsync();
+
+            // 2. Luego cargamos las asignaturas
+            asignaturasAsignadasAlUsuario = await db.asignaturasUsuario
+                .Where(au => au.IdUsuario == currentUserId)
+                .Join(
+                    db.asignaturas,
+                    au => au.IdAsignatura,
+                    a => a.Id,
+                    (au, a) => a
+                )
+                .Where(a => a.Estado == 1)
+                .OrderBy(a => a.Name)
+                .ToListAsync();
+
+            // 3. Cargamos los nombres de profesores
+            var userIds = cuestionarios.Select(c => c.IdUsuario).Distinct().ToList();
+            var users = await db.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u.UserName);
+            
+            nombresProfesores = users;
+
+            // 4. Cargamos el número de preguntas por cuestionario
+            foreach (var cuestionario in cuestionarios)
+            {
+                var numPreguntas = await db.preguntasCuestionario
+                    .CountAsync(pc => pc.IdCuestionario == cuestionario.Id);
+                numeroPreguntasPorCuestionario[cuestionario.Id] = numPreguntas;
+            }
+
+            // 5. Finalmente cargamos las puntuaciones
+            foreach (var cuestionario in cuestionarios)
+            {
+                var puntuaciones = await db.puntuacion
+                    .Where(p => p.IdCuestionario == cuestionario.Id)
+                    .ToListAsync();
+
+                numeroIntentosPorCuestionario[cuestionario.Id] = puntuaciones.Count;
+
+                if (puntuaciones.Any())
+                {
+                    var promedio = puntuaciones.Average(p => p.puntuacion);
+                    promedioPorCuestionario[cuestionario.Id] = Math.Round(promedio, 1);
+                }
+            }
+
+            // Logging
+            Console.WriteLine($"Cuestionarios cargados: {cuestionarios.Count}");
+            Console.WriteLine($"Asignaturas cargadas: {asignaturasAsignadasAlUsuario.Count}");
+            Console.WriteLine($"Profesores cargados: {nombresProfesores.Count}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar datos: {ex.Message}");
+            throw;
+        }
+    }
+
+    private void AbrirModalCrearCuestionario()
+    {
+        nombreCuestionario = string.Empty;
+        asignaturaSeleccionada = string.Empty;
+        preguntasNuevas.Clear();
+        showCrearModal = true;
+    }
+
+    private void CerrarModal()
+    {
+        showCrearModal = false;
+        showVerModal = false;
+        showEditModal = false;
+        showConfirmModal = false;
+    }
+
+    private void AgregarNuevaPregunta()
+    {
+        preguntasNuevas.Add(new PreguntaConRespuestas());
+        StateHasChanged();
+    }
+
+    private void EliminarPregunta(int index)
+    {
+        if (index >= 0 && index < preguntasNuevas.Count)
+        {
+            preguntasNuevas.RemoveAt(index);
+            StateHasChanged();
+        }
+    }
+
+    private void AgregarRespuesta(int indexPregunta)
+    {
+        if (indexPregunta >= 0 && indexPregunta < preguntasNuevas.Count)
+        {
+            preguntasNuevas[indexPregunta].Respuestas.Add(new RespuestaNueva());
+            StateHasChanged();
+        }
+    }
+
+    private void EliminarRespuesta(int indexPregunta, int indexRespuesta)
+    {
+        if (indexPregunta >= 0 && indexPregunta < preguntasNuevas.Count)
+        {
+            var pregunta = preguntasNuevas[indexPregunta];
+            if (indexRespuesta >= 0 && indexRespuesta < pregunta.Respuestas.Count)
+            {
+                pregunta.Respuestas.RemoveAt(indexRespuesta);
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void MarcarRespuestaCorrecta(int indexPregunta, int indexRespuesta)
+    {
+        if (indexPregunta >= 0 && indexPregunta < preguntasNuevas.Count)
+        {
+            var pregunta = preguntasNuevas[indexPregunta];
+            // Desmarcar todas las respuestas
+            foreach (var respuesta in pregunta.Respuestas)
+            {
+                respuesta.Correcta = false;
+            }
+            // Marcar la seleccionada como correcta
+            if (indexRespuesta >= 0 && indexRespuesta < pregunta.Respuestas.Count)
+            {
+                pregunta.Respuestas[indexRespuesta].Correcta = true;
+            }
+        }
+    }
+
+    private async Task GuardarCuestionario()
+    {
+        if (string.IsNullOrEmpty(nombreCuestionario))
+        {
+            return;
+        }
+
+        if (nombreRepetido)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(asignaturaSeleccionada))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Por favor, seleccione una asignatura.");
+            return;
+        }
+
+        if (!preguntasNuevas.Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Debe añadir al menos una pregunta al cuestionario.");
+            return;
+        }
+
+        // Validar que cada pregunta tenga al menos dos respuestas y una correcta
+        foreach (var pregunta in preguntasNuevas)
+        {
+            if (string.IsNullOrEmpty(pregunta.Name))
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Todas las preguntas deben tener un enunciado.");
+                return;
+            }
+
+            if (pregunta.Respuestas.Count < 2)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Cada pregunta debe tener al menos dos respuestas.");
+                return;
+            }
+
+            if (!pregunta.Respuestas.Any(r => r.Correcta))
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Cada pregunta debe tener una respuesta correcta marcada.");
+                return;
+            }
+        }
+
+        try
+        {
+            // Crear el cuestionario
+            var nuevoCuestionario = new Cuestionario
+            {
+                Name = nombreCuestionario,
+                IdUsuario = currentUserId,
+                Estado = 1,
+                Asignatura = asignaturaSeleccionada
+            };
+
+            db.cuestionarios.Add(nuevoCuestionario);
+            await db.SaveChangesAsync();
+
+            // Activar la asignatura si estaba inactiva
+            var asignatura = await db.asignaturas.FirstOrDefaultAsync(a => a.Name == asignaturaSeleccionada);
+            if (asignatura != null && asignatura.Estado == 0)
+            {
+                asignatura.Estado = 1;
+                await db.SaveChangesAsync();
+            }
+
+            // Guardar las preguntas y respuestas
+            foreach (var preguntaNueva in preguntasNuevas)
+            {
+                var pregunta = new Pregunta
+                {
+                    Name = preguntaNueva.Name,
+                    Estado = 1,
+                    UserId = currentUserId
+                };
+
+                db.preguntas.Add(pregunta);
+                await db.SaveChangesAsync();
+
+                // Asociar la pregunta al cuestionario
+                db.preguntasCuestionario.Add(new PreguntasCuestionario
+                {
+                    IdCuestionario = nuevoCuestionario.Id,
+                    IdPregunta = pregunta.Id
+                });
+
+                // Guardar las respuestas
+                foreach (var respuestaNueva in preguntaNueva.Respuestas)
+                {
+                    db.respuestas.Add(new Respuesta
+                    {
+                        IdPregunta = pregunta.Id,
+                        Texto = respuestaNueva.Texto,
+                        Correcta = respuestaNueva.Correcta,
+                        Estado = 1
+                    });
+                }
+            }
+
+            await db.SaveChangesAsync();
+            await CargarDatos();
+            showCrearModal = false;
+            await ShowToast("¡Cuestionario creado con éxito!");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al guardar el cuestionario: {ex.Message}");
+        }
+    }
+
+    private int ObtenerNumeroPreguntasCuestionario(int cuestionarioId)
+    {
+        return numeroPreguntasPorCuestionario.GetValueOrDefault(cuestionarioId, 0);
+    }
+
+    private string ObtenerNombreProfesor(string userId)
+    {
+        if (string.IsNullOrEmpty(userId)) return "Profesor";
+        return nombresProfesores.GetValueOrDefault(userId, "Profesor");
+    }
+
+    private void EliminarCuestionario(int id)
+    {
+        cuestionarioIdAEliminar = id;
+        showConfirmModal = true;
+    }
+
+    private async Task ConfirmarEliminarCuestionario()
+    {
+        try
+        {
+            var cuestionario = await db.cuestionarios.FindAsync(cuestionarioIdAEliminar);
+            if (cuestionario != null)
+            {
+                // Eliminar relaciones con preguntas
+                var preguntasCuestionario = await db.preguntasCuestionario
+                    .Where(pc => pc.IdCuestionario == cuestionarioIdAEliminar)
+                    .ToListAsync();
+
+                db.preguntasCuestionario.RemoveRange(preguntasCuestionario);
+                db.cuestionarios.Remove(cuestionario);
+                await db.SaveChangesAsync();
+
+                await CargarDatos();
+            }
+            showConfirmModal = false;
+            await ShowToast("¡Cuestionario eliminado con éxito!");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al eliminar el cuestionario: {ex.Message}");
+        }
+    }
+
+    private async Task EditarCuestionario(Cuestionario cuestionario)
+    {
+        // Cargar datos del cuestionario actual
+        nombreCuestionarioEdicion = cuestionario.Name + " (Nueva versión)";
+        asignaturaSeleccionadaEdicion = cuestionario.Asignatura;
+        preguntasEdicion.Clear();
+
+        // Cargar preguntas existentes
+        var preguntas = await db.preguntas
+            .Where(p => db.preguntasCuestionario
+                .Where(pc => pc.IdCuestionario == cuestionario.Id)
+                .Select(pc => pc.IdPregunta)
+                .Contains(p.Id))
+            .ToListAsync();
+
+        // Cargar respuestas para cada pregunta
+        foreach (var pregunta in preguntas)
+        {
+            var preguntaEdicion = new PreguntaConRespuestas
+            {
+                Name = pregunta.Name
+            };
+
+            var respuestas = await db.respuestas
+                .Where(r => r.IdPregunta == pregunta.Id)
+                .ToListAsync();
+
+            foreach (var respuesta in respuestas)
+            {
+                preguntaEdicion.Respuestas.Add(new RespuestaNueva
+                {
+                    Texto = respuesta.Texto,
+                    Correcta = respuesta.Correcta ?? false
+                });
+            }
+
+            preguntasEdicion.Add(preguntaEdicion);
+        }
+
+        showEditModal = true;
+    }
+
+    private async Task GuardarEdicionCuestionario()
+    {
+        if (string.IsNullOrEmpty(nombreCuestionarioEdicion) || string.IsNullOrEmpty(asignaturaSeleccionadaEdicion))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Por favor, complete la información del cuestionario.");
+            return;
+        }
+
+        if (!preguntasEdicion.Any())
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Debe tener al menos una pregunta en el cuestionario.");
+            return;
+        }
+
+        // Validar que cada pregunta tenga al menos dos respuestas y una correcta
+        foreach (var pregunta in preguntasEdicion)
+        {
+            if (string.IsNullOrEmpty(pregunta.Name))
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Todas las preguntas deben tener un enunciado.");
+                return;
+            }
+
+            if (pregunta.Respuestas.Count < 2)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Cada pregunta debe tener al menos dos respuestas.");
+                return;
+            }
+
+            if (!pregunta.Respuestas.Any(r => r.Correcta))
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Cada pregunta debe tener una respuesta correcta marcada.");
+                return;
+            }
+        }
+
+        try
+        {
+            // Crear nuevo cuestionario
+            var nuevoCuestionario = new Cuestionario
+            {
+                Name = nombreCuestionarioEdicion,
+                IdUsuario = currentUserId,
+                Estado = 1,
+                Asignatura = asignaturaSeleccionadaEdicion
+            };
+
+            db.cuestionarios.Add(nuevoCuestionario);
+            await db.SaveChangesAsync();
+
+            // Guardar las preguntas y respuestas
+            foreach (var preguntaEdicion in preguntasEdicion)
+            {
+                var pregunta = new Pregunta
+                {
+                    Name = preguntaEdicion.Name,
+                    Estado = 1,
+                    UserId = currentUserId
+                };
+
+                db.preguntas.Add(pregunta);
+                await db.SaveChangesAsync();
+
+                // Asociar la pregunta al cuestionario
+                db.preguntasCuestionario.Add(new PreguntasCuestionario
+                {
+                    IdCuestionario = nuevoCuestionario.Id,
+                    IdPregunta = pregunta.Id
+                });
+
+                // Guardar las respuestas
+                foreach (var respuestaEdicion in preguntaEdicion.Respuestas)
+                {
+                    db.respuestas.Add(new Respuesta
+                    {
+                        IdPregunta = pregunta.Id,
+                        Texto = respuestaEdicion.Texto,
+                        Correcta = respuestaEdicion.Correcta,
+                        Estado = 1
+                    });
+                }
+            }
+
+            await db.SaveChangesAsync();
+            await CargarDatos();
+            showEditModal = false;
+            await ShowToast("¡Nueva versión del cuestionario creada con éxito!");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al guardar el cuestionario: {ex.Message}");
+        }
+    }
+
+    private void MarcarRespuestaCorrectaEdicion(int indexPregunta, int indexRespuesta)
+    {
+        if (indexPregunta >= 0 && indexPregunta < preguntasEdicion.Count)
+        {
+            var pregunta = preguntasEdicion[indexPregunta];
+            // Desmarcar todas las respuestas
+            foreach (var respuesta in pregunta.Respuestas)
+            {
+                respuesta.Correcta = false;
+            }
+            // Marcar la seleccionada como correcta
+            if (indexRespuesta >= 0 && indexRespuesta < pregunta.Respuestas.Count)
+            {
+                pregunta.Respuestas[indexRespuesta].Correcta = true;
+            }
+        }
+    }
+
+    private bool EsCuestionarioPropio(string idUsuario)
+    {
+        return idUsuario == currentUserId;
+    }
+
+    private async Task VerCuestionario(Cuestionario cuestionario)
+    {
+        cuestionarioSeleccionado = cuestionario;
+        
+        // Cargar preguntas del cuestionario usando la misma consulta que funciona
+        preguntasDelCuestionario = await db.preguntas
+            .Where(p => db.preguntasCuestionario
+                .Where(pc => pc.IdCuestionario == cuestionario.Id)
+                .Select(pc => pc.IdPregunta)
+                .Contains(p.Id))
+            .ToListAsync();
+
+        Console.WriteLine($"Preguntas encontradas: {preguntasDelCuestionario.Count}");
+
+        // Cargar respuestas para cada pregunta
+        respuestasPorPregunta.Clear();
+        foreach (var pregunta in preguntasDelCuestionario)
+        {
+            var respuestas = await db.respuestas
+                .Where(r => r.IdPregunta == pregunta.Id)
+                .ToListAsync();
+            
+            Console.WriteLine($"Respuestas encontradas para pregunta {pregunta.Id}: {respuestas.Count}");
+            respuestasPorPregunta[pregunta.Id] = respuestas;
+        }
+
+        showVerModal = true;
+    }
+
+    private void CambiarTab(string tab)
+    {
+        activeTab = tab;
+        searchTerm = "";
+        StateHasChanged();
+    }
+
+    private async Task OnNombreCuestionarioChange(ChangeEventArgs e)
+    {
+        nombreCuestionario = e.Value?.ToString() ?? "";
+        
+        if (!string.IsNullOrEmpty(nombreCuestionario))
+        {
+            nombreRepetido = await db.cuestionarios
+                .AnyAsync(c => c.Name.ToLower() == nombreCuestionario.ToLower() && 
+                              c.IdUsuario == currentUserId);
+        }
+        else
+        {
+            nombreRepetido = false;
+        }
+        StateHasChanged();
+    }
+} 

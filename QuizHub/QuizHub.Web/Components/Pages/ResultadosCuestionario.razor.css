@@ -1,0 +1,263 @@
+/* Mantener los estilos base del quiz-page y añadir: */
+
+.results-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 3rem 0;
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(33, 150, 243, 0.05));
+    border-radius: 24px;
+}
+
+.header-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.header-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-icon i {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    z-index: 2;
+}
+
+.score-banner {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.score-circle {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1.5rem;
+}
+
+.score-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2;
+}
+
+.score {
+    font-size: 2.5rem;
+    font-weight: 800;
+}
+
+.total {
+    font-size: 1.5rem;
+    opacity: 0.8;
+}
+
+.score-ring {
+    width: 120px;
+    height: 120px;
+    transform: rotate(-90deg);
+}
+
+circle {
+    fill: none;
+    stroke-width: 8;
+}
+
+.score-background {
+    stroke: rgba(0, 0, 0, 0.1);
+}
+
+.score-progress {
+    stroke: currentColor;
+    transition: stroke-dasharray 1s ease;
+}
+
+/* Clases de puntuación */
+.excellent {
+    color: #2ecc71;
+}
+
+.good {
+    color: #3498db;
+}
+
+.average {
+    color: #f1c40f;
+}
+
+.needs-improvement {
+    color: #e74c3c;
+}
+
+.score-details {
+    text-align: center;
+}
+
+.score-text {
+    font-size: 1.2rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.score-message {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.results-container {
+    background: white;
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+}
+
+.questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.question-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.question-number {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.question-stats {
+    font-size: 0.9rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    margin-right: 0.5rem;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.answers-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.answer-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.answer-display.correct {
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.answer-display.incorrect {
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.answer-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.correct .answer-icon {
+    background: #2ecc71;
+    color: white;
+}
+
+.incorrect .answer-icon {
+    background: #e74c3c;
+    color: white;
+}
+
+.answer-text {
+    flex: 1;
+    color: #2c3e50;
+}
+
+.results-footer {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 50px;
+    background: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-button:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .results-page {
+        padding: 1rem;
+    }
+
+    .results-header {
+        padding: 2rem 1rem;
+    }
+
+    .question-card {
+        padding: 1.5rem;
+    }
+
+    .question-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+} 

@@ -1,0 +1,207 @@
+@page "/GestionAlumnos"
+@using Microsoft.AspNetCore.Identity
+@using QuizHub.Web.Data
+@inherits ComponentBase
+
+<div class="admin-page">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-users-gear"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Gestión de Alumnos</h1>
+            <p>Administra y visualiza el progreso de tus estudiantes</p>
+        </div>
+    </div>
+
+    <div class="actions-bar">
+        <div class="search-input">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" 
+                   @bind="searchTerm" 
+                   @bind:event="oninput" 
+                   @onkeyup="FiltrarAlumnos" 
+                   placeholder="Buscar alumnos..." />
+        </div>
+    </div>
+
+    @if (alumnos == null)
+    {
+        <div class="loading-state">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <p>Cargando alumnos...</p>
+        </div>
+    }
+    else if (!alumnos.Any())
+    {
+        <div class="empty-state">
+            <i class="fa-solid fa-users-slash"></i>
+            <p>No hay alumnos registrados</p>
+        </div>
+    }
+    else
+    {
+        <div class="students-grid">
+            @foreach (var alumno in alumnosFiltrados)
+            {
+                <div class="student-card">
+                    <div class="student-info">
+                        <div class="student-avatar">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <div class="student-details">
+                            <h3>@alumno.Email</h3>
+                            <span class="student-id">ID: @alumno.Id</span>
+                        </div>
+                    </div>
+                    
+                    <div class="student-stats">
+                        <div class="stat">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <span>@GetCompletedQuizzes(alumno.Id) cuestionarios completados</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fa-solid fa-star"></i>
+                            <span>Promedio: @GetAverageScore(alumno.Id).ToScoreString()</span>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-view" @onclick="() => VerCalificaciones(alumno)">
+                            <i class="fa-solid fa-chart-line"></i>
+                            Ver Calificaciones
+                        </button>
+                        <button class="btn-delete" @onclick="() => EliminarAlumno(alumno)">
+                            <i class="fa-solid fa-trash"></i>
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (showDeleteDialog)
+    {
+        <div class="modal-backdrop" @onclick="CancelDelete"></div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <h3>Confirmar Eliminación</h3>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar al alumno @selectedAlumno?.Email?</p>
+                    <p class="warning-text">Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" @onclick="CancelDelete">Cancelar</button>
+                    <button class="btn-confirm" @onclick="ConfirmDelete">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (showGradesDialog)
+    {
+        <div class="modal-backdrop" @onclick="CloseGradesDialog"></div>
+        <div class="modal-dialog grades-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="header-content">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <div>
+                            <h3>Calificaciones del Alumno</h3>
+                            <p>@selectedAlumno?.Email</p>
+                        </div>
+                    </div>
+                    <button class="btn-close" @onclick="CloseGradesDialog">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="grades-filters">
+                    <div class="filter-dropdown">
+                        <RadzenDropDown Data="@(new[] { "Todas las asignaturas" }.Concat(asignaturasProfesor))" 
+                                      @bind-Value="@filtroAsignatura"
+                                      Change="@FiltrarCalificaciones"
+                                      Class="rz-dropdown-custom"
+                                      Placeholder="Filtrar por asignatura" />
+                    </div>
+                    <div class="search-box">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" 
+                               @bind="searchTermCalificaciones" 
+                               @bind:event="oninput" 
+                               @onkeyup="FiltrarCalificaciones" 
+                               placeholder="Buscar cuestionarios..." />
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    @if (!calificacionesFiltradas.Any())
+                    {
+                        <div class="empty-grades">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                            <p>No se encontraron calificaciones</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="grades-list">
+                            @foreach (var calificacion in GetCalificacionesPaginadas())
+                            {
+                                <div class="grade-item @GetScoreClass(calificacion.Puntuacion)">
+                                    <div class="grade-info">
+                                        <h4>@calificacion.CuestionarioNombre</h4>
+                                        <div class="grade-meta">
+                                            <span class="subject">
+                                                <i class="fa-solid fa-book"></i>
+                                                @calificacion.Asignatura
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="grade-score">
+                                        <span class="score">@calificacion.Puntuacion.ToScoreString()</span>
+                                        <span class="total">/10</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (calificacionesFiltradas.Count > elementosPorPagina)
+                        {
+                            <div class="pagination-container">
+                                <div class="pagination-info">
+                                    Mostrando @(((paginaActual - 1) * elementosPorPagina) + 1) - @(Math.Min(paginaActual * elementosPorPagina, calificacionesFiltradas.Count)) de @calificacionesFiltradas.Count calificaciones
+                                </div>
+                                <div class="pagination">
+                                    <RadzenPager Count="@calificacionesFiltradas.Count" 
+                                               PageSize="@elementosPorPagina"
+                                               PageNumbersCount="5"
+                                               CurrentPage="@(paginaActual - 1)"
+                                               PageChanged="@OnPageChanged"
+                                               ShowPagingSummary="true"
+                                               PagingSummaryFormat="Página {0} de {1}"
+                                               Class="rz-pager-custom" />
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject]
+    private UserManager<ApplicationUser> UserManager { get; set; }
+
+    [Inject]
+    private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
+    [Inject]
+    private IDbContextFactory<ApplicationDbContext> DbFactory { get; set; }
+} 

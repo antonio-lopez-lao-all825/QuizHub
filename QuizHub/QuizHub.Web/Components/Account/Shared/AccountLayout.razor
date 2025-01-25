@@ -2,14 +2,42 @@
 @layout QuizHub.Web.Components.Layout.MainLayout
 @inject NavigationManager NavigationManager
 
-@if (HttpContext is null)
-{
-    <p>Loading...</p>
-}
-else
-{
-    @Body
-}
+<div class="account-layout">
+    @if (HttpContext is null)
+    {
+        <div class="loading-state">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <p>Cargando...</p>
+        </div>
+    }
+    else
+    {
+        @Body
+    }
+</div>
+
+<style>
+    .account-layout {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(33, 150, 243, 0.05));
+        padding: 2rem;
+    }
+
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        color: var(--primary-color);
+    }
+
+    .loading-state i {
+        font-size: 2rem;
+    }
+</style>
 
 @code {
     [CascadingParameter]
@@ -21,7 +49,7 @@ else
         {
             // If this code runs, we're currently rendering in interactive mode, so there is no HttpContext.
             // The identity pages need to set cookies, so they require an HttpContext. To achieve this we
-            // must transition back from interactive mode to a server-rendered page.
+            // must transition back from interactive mode r-rto a serveendered page.
             NavigationManager.Refresh(forceReload: true);
         }
     }

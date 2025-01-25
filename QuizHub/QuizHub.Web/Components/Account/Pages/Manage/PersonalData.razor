@@ -2,24 +2,50 @@
 
 @inject IdentityUserAccessor UserAccessor
 
-<PageTitle>Personal Data</PageTitle>
+<div class="profile-page">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Datos Personales</h1>
+            <p>Gestiona la información de tu cuenta</p>
+        </div>
+    </div>
 
-<StatusMessage />
-<h3>Personal Data</h3>
+    <div class="profile-card">
+        <StatusMessage />
+        
+        <div class="info-section">
+            <div class="info-header">
+                <i class="fa-solid fa-circle-info"></i>
+                <div>
+                    <h3>Tu Información</h3>
+                    <p>Tu cuenta contiene datos personales que nos has proporcionado. Esta página te permite descargar o eliminar esa información.</p>
+                </div>
+            </div>
 
-<div class="row">
-    <div class="col-md-6">
-        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
-        <p>
-            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-        </p>
-        <form action="Account/Manage/DownloadPersonalData" method="post">
-            <AntiforgeryToken />
-            <button class="btn btn-primary" type="submit">Download</button>
-        </form>
-        <p>
-            <a href="Account/Manage/DeletePersonalData" class="btn btn-danger">Delete</a>
-        </p>
+            <div class="warning-box">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <p>Eliminar estos datos eliminará permanentemente tu cuenta, y esto no se puede recuperar.</p>
+            </div>
+        </div>
+
+        <div class="actions-group">
+            <form action="Account/Manage/DownloadPersonalData" method="post">
+                <AntiforgeryToken />
+                <button class="btn-action download" type="submit">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Descargar Datos</span>
+                </button>
+            </form>
+
+            <a href="Account/Manage/DeletePersonalData" class="btn-action delete">
+                <i class="fa-solid fa-trash"></i>
+                <span>Eliminar Cuenta</span>
+            </a>
+        </div>
     </div>
 </div>
 
