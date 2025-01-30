@@ -1,3 +1,168 @@
+/* Estilos base de la navbar */
+.navbar {
+    background: white;
+    height: var(--navbar-height);
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    position: relative;
+}
+
+/* Logo y marca */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.brand-icon {
+    background: var(--primary-color);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transform: rotate(-10deg);
+    transition: all 0.3s ease;
+}
+
+/* Botón hamburguesa - siempre oculto por defecto */
+.navbar-toggler {
+    display: none;
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 1rem;
+}
+
+.navbar-toggler-icon {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+}
+
+/* Contenido de navegación */
+.nav-content {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Estilos para los NavLinks */
+::deep .nav-link {
+    color: var(--text-color) !important;
+    text-decoration: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    border: 1px solid transparent;
+}
+
+/* Sección de autenticación */
+.auth-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-left: 1.5rem;
+    border-left: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Media query ÚNICO para responsive */
+@media (max-width: 1200px) {
+    .navbar-toggler {
+        display: block;
+    }
+
+    .nav-content {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        flex-direction: column;
+        align-items: stretch;
+        z-index: 1000;
+    }
+
+    .nav-content.expanded {
+        display: flex;
+    }
+
+    .nav-content.collapsed {
+        display: none;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .auth-section {
+        flex-direction: column;
+        width: 100%;
+        padding-left: 0;
+        border-left: none;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+
+    ::deep .nav-link,
+    ::deep .user-profile,
+    .logout-button,
+    ::deep .login-button,
+    ::deep .register-button {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 0.8rem 1rem;
+    }
+
+    .logout-form {
+        width: 100%;
+    }
+
+    .logout-button {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+/* Mantener el resto de los estilos existentes para los iconos y estados hover/active */
+
 .navbar {
     background: white;
     height: var(--navbar-height);
@@ -25,20 +190,6 @@
     transition: all 0.3s ease;
 }
 
-.brand-icon {
-    background: var(--primary-color);
-    color: white;
-    width: 35px;
-    height: 35px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    transform: rotate(-10deg);
-    transition: all 0.3s ease;
-}
-
 .navbar-brand a:hover .brand-icon {
     transform: rotate(5deg) scale(1.1);
     box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
@@ -55,12 +206,6 @@
     display: flex;
     align-items: center;
     gap: 2.5rem;
-}
-
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
 }
 
 /* Estilo para todos los NavLinks */
@@ -94,15 +239,6 @@
     color: var(--primary-color) !important;
     border-color: rgba(33, 150, 243, 0.2);
     font-weight: 600;
-}
-
-/* Estilos específicos para la sección de autenticación */
-.auth-section {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding-left: 1.5rem;
-    border-left: 2px solid rgba(0, 0, 0, 0.08);
 }
 
 /* Estilo para el perfil de usuario */
@@ -174,78 +310,6 @@
     color: white !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-    .nav-content {
-        position: absolute;
-        top: var(--navbar-height);
-        left: 1rem;
-        right: 1rem;
-        background: white;
-        flex-direction: column;
-        padding: 1rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        display: none;
-        animation: slideDown 0.3s ease-out;
-    }
-
-    .nav-content.show {
-        display: flex;
-    }
-
-    .nav-links {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    ::deep .nav-link {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .auth-section {
-        flex-direction: column;
-        width: 100%;
-        border-left: none;
-        border-top: 2px solid rgba(0, 0, 0, 0.08);
-        padding: 1rem 0 0 0;
-        margin-top: 1rem;
-    }
-
-    ::deep .user-profile,
-    .logout-button,
-    ::deep .login-button,
-    ::deep .register-button {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.navbar-toggler {
-    appearance: none;
-    cursor: pointer;
-    width: 3.5rem;
-    height: 2.5rem;
-    color: white;
-    position: absolute;
-    top: 0.5rem;
-    right: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem rgba(255, 255, 255, 0.1);
 }
 
 .navbar-toggler:checked {
@@ -332,7 +396,7 @@
     display: block;
 }
 
-@media (min-width: 641px) {
+@media (min-width: 1200px) {
     .navbar-toggler {
         display: none;
     }

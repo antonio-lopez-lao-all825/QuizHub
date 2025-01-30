@@ -10,32 +10,57 @@
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<DeletePersonalData> Logger
 
-<PageTitle>Delete Personal Data</PageTitle>
-
-<StatusMessage Message="@message" />
-
-<h3>Delete Personal Data</h3>
-
-<div class="alert alert-warning" role="alert">
-    <p>
-        <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-    </p>
-</div>
-
-<div>
-    <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
-        <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger" role="alert" />
-        @if (requirePassword)
-        {
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password." />
-                <label for="password" class="form-label">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
+<div class="profile-page">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-trash"></i>
+                <div class="icon-ring"></div>
             </div>
-        }
-        <button class="w-100 btn btn-lg btn-danger" type="submit">Delete data and close my account</button>
-    </EditForm>
+            <h1>Eliminar Cuenta</h1>
+            <p>Eliminar permanentemente tu cuenta y datos</p>
+        </div>
+    </div>
+
+    <div class="profile-card">
+        <StatusMessage Message="@message" />
+        
+        <div class="warning-section">
+            <div class="warning-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="warning-text">
+                <strong>La eliminación de estos datos eliminará permanentemente tu cuenta y no se podrá recuperar.</strong>
+            </div>
+        </div>
+
+        <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+            
+            @if (requirePassword)
+            {
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-lock"></i>
+                        <InputText type="password" 
+                                  @bind-Value="Input.Password" 
+                                  class="form-control" 
+                                  autocomplete="current-password" 
+                                  aria-required="true" 
+                                  placeholder="Ingresa tu contraseña para confirmar" />
+                    </div>
+                    <ValidationMessage For="() => Input.Password" class="text-danger" />
+                </div>
+            }
+
+            <button type="submit" class="btn-delete">
+                <i class="fa-solid fa-trash"></i>
+                Eliminar mi cuenta y datos
+            </button>
+        </EditForm>
+    </div>
 </div>
 
 @code {

@@ -3,216 +3,122 @@
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
-<style>
-    .cuestionario-container {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 2rem 1rem;
-    }
-
-    .cuestionario-card {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        margin-bottom: 1.5rem;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .cuestionario-header {
-        padding: 1.5rem;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #f8f9fa;
-    }
-
-    .cuestionario-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.5rem;
-    }
-
-    .metadata-section {
-        display: flex;
-        gap: 1.5rem;
-        align-items: center;
-        margin-top: 0.5rem;
-    }
-
-    .metadata-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.9rem;
-        color: #4a5568;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1.5rem;
-        padding: 1.5rem;
-        background: #f8fafc;
-        margin-top: 1rem;
-    }
-
-    .stat-box {
-        text-align: center;
-        padding: 1rem;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #2d3748;
-    }
-
-    .stat-label {
-        font-size: 0.85rem;
-        color: #718096;
-        margin-top: 0.25rem;
-    }
-
-    .progress-container {
-        padding: 1.5rem;
-        background: #f8fafc;
-    }
-
-    .progress-bar {
-        height: 10px;
-        background: #e2e8f0;
-        border-radius: 5px;
-        overflow: hidden;
-    }
-
-    .progress-fill {
-        height: 100%;
-        background: #48bb78;
-        transition: width 0.5s ease;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 2rem;
-        color: #a0aec0;
-        font-style: italic;
-    }
-
-    .asignatura-tag {
-        background: #4a5568;
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        display: inline-block;
-        margin-top: 0.5rem;
-    }
-
-    .admin-title {
-        font-size: 2rem;
-        font-weight: 500; /* Reducido para hacerlo más fino */
-        text-align: center;
-        margin: 2rem 0 3rem;
-        color: #000; /* Negro */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-    }
-</style>
-
-<div class="cuestionario-container">
-    <h3 class="admin-title">
-        <i class="fas fa-clipboard-list"></i>
-        Administración de Cuestionarios
-    </h3>
-
-    @foreach (var cuestionario in cuestionarios)
-    {
-        <div class="cuestionario-card">
-            <div class="cuestionario-header" @onclick="@(() => ToggleCuestionario(cuestionario.Id))">
-                <div>
-                    <div class="cuestionario-title">@cuestionario.Name</div>
-                    <div class="metadata-section">
-                        <div class="metadata-item">
-                            <i class="fas fa-book"></i>
-                            <span class="asignatura-tag">
-                                @(GetNombreAsignatura(cuestionario.Asignatura) ?? "Sin asignatura")
-                            </span>
-                        </div>
-                        <div class="metadata-item">
-                            <i class="fas fa-user-tie"></i>
-                            @(GetProfesorName(cuestionario.IdUsuario) ?? "Profesor no encontrado")
-                        </div>
-                        <div class="metadata-item">
-                            <i class="fas fa-users"></i>
-                            @GetTotalAlumnos(cuestionario.Id) alumnos
-                        </div>
-                    </div>
-                </div>
-                <i class="fas @(expandedCuestionarios.ContainsKey(cuestionario.Id) && expandedCuestionarios[cuestionario.Id] ? "fa-chevron-up" : "fa-chevron-down")"></i>
+<div class="profile-page">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-clipboard-list"></i>
+                <div class="icon-ring"></div>
             </div>
-
-            @if (expandedCuestionarios.ContainsKey(cuestionario.Id) && expandedCuestionarios[cuestionario.Id])
-            {
-                <div class="cuestionario-details">
-                    @if (HasResultados(cuestionario.Id))
-                    {
-                        <div class="stats-grid">
-                            <div class="stat-box">
-                                <div class="stat-value">@GetPromedio(cuestionario.Id)</div>
-                                <div class="stat-label">Promedio</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-value">@GetMaxima(cuestionario.Id)</div>
-                                <div class="stat-label">Máxima</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-value">@GetMinima(cuestionario.Id)</div>
-                                <div class="stat-label">Mínima</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-value">@GetModa(cuestionario.Id)</div>
-                                <div class="stat-label">Moda</div>
-                            </div>
-                        </div>
-
-                        <div class="progress-container">
-                            <div class="flex justify-between mb-2">
-                                <span>Aprobados: @GetAprobados(cuestionario.Id)</span>
-                                <span>@GetPorcentajeAprobados(cuestionario.Id)%</span>
-                                <span>Suspensos: @GetReprobados(cuestionario.Id)</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: @(GetPorcentajeAprobados(cuestionario.Id))%"></div>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="empty-state">
-                            <i class="fas fa-chart-bar fa-2x mb-2"></i>
-                            <div>Ningún alumno ha realizado este cuestionario</div>
-                        </div>
-                    }
-
-                    <div class="text-right p-3">
-                        <button @onclick="@(() => DeleteCuestionario(cuestionario.Id))"
-                                class="btn btn-danger btn-sm">
-                            <i class="fas fa-trash mr-2"></i>
-                            Eliminar Cuestionario
-                        </button>
-                    </div>
-                </div>
-            }
+            <h1>Administración de Cuestionarios</h1>
+            <p>Gestiona y monitorea los cuestionarios</p>
         </div>
-    }
+    </div>
+
+    <div class="profile-card">
+        @if (!string.IsNullOrEmpty(modalMessage))
+        {
+            <div class="alert @(modalSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show">
+                <i class="@(modalSuccess ? "fas fa-check-circle" : "fas fa-exclamation-circle")"></i>
+                <span>@modalMessage</span>
+            </div>
+        }
+
+        @if (!cuestionarios.Any())
+        {
+            <div class="empty-state">
+                <i class="fas fa-clipboard-question"></i>
+                <h3>No hay cuestionarios</h3>
+                <p>Aún no se han creado cuestionarios en el sistema</p>
+            </div>
+        }
+        else
+        {
+            <div class="quizzes-list">
+                @foreach (var cuestionario in cuestionarios)
+                {
+                    <div class="quiz-card">
+                        <div class="quiz-header" @onclick="@(() => ToggleCuestionario(cuestionario.Id))">
+                            <div class="quiz-info">
+                                <div class="quiz-title">@cuestionario.Name</div>
+                                <div class="quiz-metadata">
+                                    <div class="metadata-item">
+                                        <i class="fas fa-book"></i>
+                                        <span class="subject-tag">
+                                            @(GetNombreAsignatura(cuestionario.Asignatura) ?? "Sin asignatura")
+                                        </span>
+                                    </div>
+                                    <div class="metadata-item">
+                                        <i class="fas fa-user-tie"></i>
+                                        <span>@(GetProfesorName(cuestionario.IdUsuario) ?? "Profesor no encontrado")</span>
+                                    </div>
+                                    <div class="metadata-item">
+                                        <i class="fas fa-users"></i>
+                                        <span>@GetTotalAlumnos(cuestionario.Id) alumnos</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="toggle-icon">
+                                <i class="fas @(expandedCuestionarios.ContainsKey(cuestionario.Id) && expandedCuestionarios[cuestionario.Id] ? "fa-chevron-up" : "fa-chevron-down")"></i>
+                            </div>
+                        </div>
+
+                        @if (expandedCuestionarios.ContainsKey(cuestionario.Id) && expandedCuestionarios[cuestionario.Id])
+                        {
+                            <div class="quiz-content">
+                                @if (HasResultados(cuestionario.Id))
+                                {
+                                    <div class="stats-grid">
+                                        <div class="stat-box">
+                                            <div class="stat-value">@GetPromedio(cuestionario.Id).ToString("F1")</div>
+                                            <div class="stat-label">Promedio</div>
+                                        </div>
+                                        <div class="stat-box">
+                                            <div class="stat-value">@GetMaxima(cuestionario.Id)</div>
+                                            <div class="stat-label">Máxima</div>
+                                        </div>
+                                        <div class="stat-box">
+                                            <div class="stat-value">@GetMinima(cuestionario.Id)</div>
+                                            <div class="stat-label">Mínima</div>
+                                        </div>
+                                        <div class="stat-box">
+                                            <div class="stat-value">@GetModa(cuestionario.Id)</div>
+                                            <div class="stat-label">Moda</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="progress-section">
+                                        <div class="progress-info">
+                                            <span>Aprobados: @GetAprobados(cuestionario.Id)</span>
+                                            <span>@GetPorcentajeAprobados(cuestionario.Id)%</span>
+                                            <span>Suspensos: @GetReprobados(cuestionario.Id)</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: @(GetPorcentajeAprobados(cuestionario.Id))%"></div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="empty-state">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <p>Ningún alumno ha realizado este cuestionario</p>
+                                    </div>
+                                }
+
+                                <div class="quiz-actions">
+                                    <button @onclick="@(() => DeleteCuestionario(cuestionario.Id))" class="btn-delete">
+                                        <i class="fas fa-trash"></i>
+                                        <span>Eliminar Cuestionario</span>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
 </div>
 
 @code {
@@ -220,6 +126,8 @@
     private Dictionary<int, bool> expandedCuestionarios = new Dictionary<int, bool>();
     private List<ApplicationUser> profesores = new List<ApplicationUser>();
     private List<Asignatura> asignaturas = new List<Asignatura>();
+    private string modalMessage = string.Empty;
+    private bool modalSuccess = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -320,26 +228,60 @@
 
     private async Task DeleteCuestionario(int cuestionarioId)
     {
-        using var context = DbContextFactory.CreateDbContext();
-        var cuestionario = await context.cuestionarios.FindAsync(cuestionarioId);
-
-        if (cuestionario != null)
+        try
         {
-            var relaciones = await context.preguntasCuestionario
-                .Where(pc => pc.IdCuestionario == cuestionarioId)
-                .ToListAsync();
+            using var context = DbContextFactory.CreateDbContext();
+            var cuestionario = await context.cuestionarios.FindAsync(cuestionarioId);
 
-            var puntuaciones = await context.puntuacion
-                .Where(p => p.IdCuestionario == cuestionarioId)
-                .ToListAsync();
+            if (cuestionario != null)
+            {
+                var relaciones = await context.preguntasCuestionario
+                    .Where(pc => pc.IdCuestionario == cuestionarioId)
+                    .ToListAsync();
 
-            context.preguntasCuestionario.RemoveRange(relaciones);
-            context.puntuacion.RemoveRange(puntuaciones);
-            context.cuestionarios.Remove(cuestionario);
+                var puntuaciones = await context.puntuacion
+                    .Where(p => p.IdCuestionario == cuestionarioId)
+                    .ToListAsync();
 
-            await context.SaveChangesAsync();
-            cuestionarios.Remove(cuestionario);
+                context.preguntasCuestionario.RemoveRange(relaciones);
+                context.puntuacion.RemoveRange(puntuaciones);
+                context.cuestionarios.Remove(cuestionario);
+
+                await context.SaveChangesAsync();
+
+                modalSuccess = true;
+                modalMessage = "Cuestionario eliminado exitosamente";
+
+                // Recargar todos los datos
+                await RecargarDatos();
+                
+                StateHasChanged();
+                
+                await Task.Delay(1500);
+                modalMessage = string.Empty;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            modalSuccess = false;
+            modalMessage = "Error al eliminar el cuestionario: " + ex.Message;
             StateHasChanged();
+        }
+    }
+
+    private async Task RecargarDatos()
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        cuestionarios = await context.cuestionarios.ToListAsync();
+        profesores = await context.Users.ToListAsync();
+        asignaturas = await context.asignaturas.ToListAsync();
+
+        // Reiniciar el diccionario de estados expandidos
+        expandedCuestionarios.Clear();
+        foreach (var c in cuestionarios)
+        {
+            expandedCuestionarios[c.Id] = false;
         }
     }
 }

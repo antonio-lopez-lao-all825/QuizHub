@@ -30,7 +30,7 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false; // Desactivar la confirmación de cuenta
+    options.SignIn.RequireConfirmedAccount = false; // Desactivar la confirmaciï¿½n de cuenta
 });
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
