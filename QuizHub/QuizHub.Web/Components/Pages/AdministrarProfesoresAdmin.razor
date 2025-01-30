@@ -4,261 +4,177 @@
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject UserManager<ApplicationUser> UserManager
 
-<style>
-    .admin-container {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 2rem 1rem;
-    }
+<div class="profile-page">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fa-solid fa-chalkboard-teacher"></i>
+                <div class="icon-ring"></div>
+            </div>
+            <h1>Administración de Profesores</h1>
+            <p>Gestiona los profesores y sus asignaturas</p>
+        </div>
+    </div>
 
-    .admin-card {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        margin-bottom: 1.5rem;
-        overflow: hidden;
-        transition: transform 0.2s ease;
-    }
+    <div class="profile-card">
+        <div class="actions-top">
+            <button @onclick="ShowAddProfesorModal" class="btn-action">
+                <i class="fas fa-plus"></i>
+                <span>Nuevo Profesor</span>
+            </button>
+        </div>
 
-        .admin-card:hover {
-            transform: translateY(-2px);
+        @if (!profesores.Any())
+        {
+            <div class="empty-state">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <h3>No hay profesores</h3>
+                <p>Añade profesores usando el botón "Nuevo Profesor"</p>
+            </div>
         }
-
-    .card-header {
-        padding: 1.5rem;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #f8f9fa;
-        border-bottom: 1px solid #eee;
-    }
-
-    .card-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 0.25rem;
-    }
-
-    .card-subtitle {
-        font-size: 0.9rem;
-        color: #718096;
-    }
-
-    .metadata-grid {
-        display: flex;
-        gap: 1.5rem;
-        margin-top: 1rem;
-    }
-
-    .metadata-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.9rem;
-        color: #4a5568;
-    }
-
-    .content-section {
-        padding: 1.5rem;
-        background: #f8fafc;
-    }
-
-    .list-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .selector-grid {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-
-    .admin-title {
-        font-size: 2rem;
-        font-weight: 500; /* Reducido para hacerlo más fino */
-        text-align: center;
-        margin: 2rem 0 3rem;
-        color: #000; /* Negro */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-    }
-
-    .search-bar {
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-        .search-bar input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-
-    .empty-state {
-        text-align: center;
-        padding: 2rem;
-        color: #a0aec0;
-        font-style: italic;
-    }
-
-    .btn-icon {
-        padding: 0.6rem 1rem;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-        .btn-icon i {
-            font-size: 0.9rem;
-        }
-
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-
-    .modal-content {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        width: 100%;
-        max-width: 500px;
-    }
-</style>
-
-<div class="admin-container">
-    <h1 class="admin-title">
-        <i class="fas fa-chalkboard-teacher"></i>
-        Administración de Profesores
-    </h1>
-
-    <button @onclick="ShowAddProfesorModal" class="btn btn-primary btn-icon mb-4">
-        <i class="fas fa-plus"></i> Nuevo Profesor
-    </button>
-
-    @foreach (var profesor in profesores)
-    {
-        <div class="admin-card">
-            <div class="card-header" @onclick="@(() => ToggleProfesor(profesor.Id))">
-                <div>
-                    <div class="card-title">@profesor.UserName</div>
-                    <div class="card-subtitle">@profesor.Email</div>
-                    <div class="metadata-grid">
-                        <div class="metadata-item">
-                            <i class="fas fa-book"></i>
-                            @GetTotalAsignaturas(profesor.Id) asignaturas
+        else
+        {
+            <div class="teachers-list">
+                @foreach (var profesor in profesores)
+                {
+                    <div class="teacher-card">
+                        <div class="teacher-header" @onclick="@(() => ToggleProfesor(profesor.Id))">
+                            <div class="teacher-info">
+                                <div class="teacher-name">@profesor.UserName</div>
+                                <div class="teacher-email">@profesor.Email</div>
+                                <div class="teacher-stats">
+                                    <div class="stat-item">
+                                        <i class="fas fa-book"></i>
+                                        <span>@GetTotalAsignaturas(profesor.Id) asignaturas</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="toggle-icon">
+                                <i class="fas @(expandedProfesores.ContainsKey(profesor.Id) && expandedProfesores[profesor.Id] ? "fa-chevron-up" : "fa-chevron-down")"></i>
+                            </div>
                         </div>
 
-                    </div>
-                </div>
-                <i class="fas @(expandedProfesores.ContainsKey(profesor.Id) && expandedProfesores[profesor.Id] ? "fa-chevron-up" : "fa-chevron-down")"></i>
-            </div>
-
-            @if (expandedProfesores.ContainsKey(profesor.Id) && expandedProfesores[profesor.Id])
-            {
-                <div class="content-section">
-                    <h6>Asignaturas asignadas:</h6>
-
-                    @if (GetAsignaturasProfesor(profesor.Id).Any())
-                    {
-                        @foreach (var asignatura in GetAsignaturasProfesor(profesor.Id))
+                        @if (expandedProfesores.ContainsKey(profesor.Id) && expandedProfesores[profesor.Id])
                         {
-                            <div class="list-item">
-                                <span>@asignatura.Name</span>
-                                <button @onclick="@(() => RemoveAsignatura(profesor.Id, asignatura.Id))"
-                                        class="btn btn-sm btn-danger btn-icon">
-                                    <i class="fas fa-times"></i> Eliminar
-                                </button>
+                            <div class="teacher-content">
+                                <h6 class="content-title">
+                                    <i class="fas fa-book"></i>
+                                    Asignaturas asignadas
+                                </h6>
+
+                                @if (GetAsignaturasProfesor(profesor.Id).Any())
+                                {
+                                    <div class="subjects-list">
+                                        @foreach (var asignatura in GetAsignaturasProfesor(profesor.Id))
+                                        {
+                                            <div class="subject-item">
+                                                <span class="subject-name">
+                                                    <i class="fas fa-graduation-cap"></i>
+                                                    @asignatura.Name
+                                                </span>
+                                                <button @onclick="@(() => RemoveAsignatura(profesor.Id, asignatura.Id))" 
+                                                        class="btn-remove">
+                                                    <i class="fas fa-times"></i>
+                                                    <span>Eliminar</span>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="empty-state">
+                                        <i class="fas fa-book-open"></i>
+                                        <p>No hay asignaturas asignadas</p>
+                                    </div>
+                                }
+
+                                <div class="assign-subject">
+                                    <select class="form-control" @bind="selectedAsignaturaId">
+                                        <option value="0">Seleccionar asignatura</option>
+                                        @foreach (var asignatura in asignaturas)
+                                        {
+                                            <option value="@asignatura.Id">@asignatura.Name</option>
+                                        }
+                                    </select>
+                                    <button @onclick="@(() => AssignAsignatura(profesor.Id))"
+                                            class="btn-assign"
+                                            disabled="@(selectedAsignaturaId == 0)">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Asignar</span>
+                                    </button>
+                                </div>
+
+                                <div class="teacher-actions">
+                                    <button @onclick="@(() => DeleteProfesor(profesor.Id))" class="btn-delete">
+                                        <i class="fas fa-trash"></i>
+                                        <span>Eliminar Profesor</span>
+                                    </button>
+                                </div>
                             </div>
                         }
-                    }
-                    else
-                    {
-                        <div class="empty-state">
-                            <i class="fas fa-book-open fa-2x mb-2"></i>
-                            <div>No hay asignaturas asignadas</div>
-                        </div>
-                    }
-
-                    <div class="selector-grid">
-                        <select class="form-control" @bind="selectedAsignaturaId">
-                            <option value="0">Seleccionar asignatura</option>
-                            @foreach (var asignatura in asignaturas)
-                            {
-                                <option value="@asignatura.Id">@asignatura.Name</option>
-                            }
-                        </select>
-                        <button @onclick="@(() => AssignAsignatura(profesor.Id))"
-                                class="btn btn-success btn-icon"
-                                disabled="@(selectedAsignaturaId == 0)">
-                            <i class="fas fa-link"></i> Asignar
-                        </button>
                     </div>
-
-                    <div class="mt-3 text-right">
-                        <button @onclick="@(() => DeleteProfesor(profesor.Id))"
-                                class="btn btn-danger btn-icon">
-                            <i class="fas fa-trash"></i> Eliminar Profesor
-                        </button>
-                    </div>
-                </div>
-            }
-        </div>
-    }
+                }
+            </div>
+        }
+    </div>
 </div>
 
 @if (showAddProfesorModal)
 {
     <div class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header mb-3">
-                <h3 class="card-title">Nuevo Profesor</h3>
-                <button @onclick="CloseAddProfesorModal" class="btn btn-sm btn-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="form-group">
-                <label>Correo electrónico</label>
-                <input @bind="newProfesorEmail" class="form-control mb-2" />
-            </div>
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input @bind="newProfesorPassword" type="password" class="form-control" />
-            </div>
-            <div class="mt-4 text-right">
-                <button @onclick="AddProfesor" class="btn btn-primary btn-icon">
-                    <i class="fas fa-save"></i> Guardar
-                </button>
-                <button @onclick="CloseAddProfesorModal" class="btn btn-secondary btn-icon ml-2">
-                    <i class="fas fa-times"></i> Cancelar
-                </button>
+        <div class="modal-container">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>
+                        <i class="fas fa-user-plus"></i>
+                        Nuevo Profesor
+                    </h5>
+                    <button type="button" class="close-button" @onclick="CloseAddProfesorModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(modalMessage))
+                    {
+                        <div class="alert @(modalSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show">
+                            <i class="@(modalSuccess ? "fas fa-check-circle" : "fas fa-exclamation-circle")"></i>
+                            <span>@modalMessage</span>
+                        </div>
+                    }
+                    <div class="form-group">
+                        <label>Email</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-envelope"></i>
+                            <input @bind="newProfesorEmail" class="form-control" placeholder="email@ejemplo.com" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock"></i>
+                            <input @bind="newProfesorPassword" type="password" class="form-control" placeholder="Contraseña segura" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button @onclick="AddProfesor" class="btn-save" disabled="@isProcessing">
+                        @if (isProcessing)
+                        {
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Procesando...</span>
+                        }
+                        else
+                        {
+                            <i class="fas fa-save"></i>
+                            <span>Guardar</span>
+                        }
+                    </button>
+                    <button @onclick="CloseAddProfesorModal" class="btn-cancel" disabled="@isProcessing">
+                        <i class="fas fa-times"></i>
+                        <span>Cancelar</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -272,6 +188,9 @@
     private bool showAddProfesorModal = false;
     private string newProfesorEmail = string.Empty;
     private string newProfesorPassword = string.Empty;
+    private string modalMessage = string.Empty;
+    private bool modalSuccess = false;
+    private bool isProcessing = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -324,55 +243,93 @@
         {
             using var context = DbContextFactory.CreateDbContext();
 
-            var exists = await context.asignaturasUsuario
-                .AnyAsync(au => au.IdUsuario == userId && au.IdAsignatura == selectedAsignaturaId);
-
-            if (!exists)
+            try 
             {
-                context.asignaturasUsuario.Add(new AsignaturasUsuario
-                    {
-                        IdUsuario = userId,
-                        IdAsignatura = selectedAsignaturaId
-                    });
+                var exists = await context.asignaturasUsuario
+                    .AnyAsync(au => au.IdUsuario == userId && au.IdAsignatura == selectedAsignaturaId);
 
-                await context.SaveChangesAsync();
-                selectedAsignaturaId = 0;
-                StateHasChanged();
+                if (!exists)
+                {
+                    context.asignaturasUsuario.Add(new AsignaturasUsuario
+                        {
+                            IdUsuario = userId,
+                            IdAsignatura = selectedAsignaturaId
+                        });
+
+                    await context.SaveChangesAsync();
+                    selectedAsignaturaId = 0;
+                    StateHasChanged();
+                }
+                else
+                {
+                    // Mostrar mensaje de que ya existe la asignación
+                    modalMessage = "Esta asignatura ya está asignada al profesor";
+                    modalSuccess = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                modalMessage = "Error al asignar la asignatura: " + ex.Message;
+                modalSuccess = false;
             }
         }
     }
 
     private async Task RemoveAsignatura(string userId, int asignaturaId)
     {
-        using var context = DbContextFactory.CreateDbContext();
-        var asignaturaUsuario = await context.asignaturasUsuario
-            .FirstOrDefaultAsync(au => au.IdUsuario == userId && au.IdAsignatura == asignaturaId);
-
-        if (asignaturaUsuario != null)
+        try
         {
-            context.asignaturasUsuario.Remove(asignaturaUsuario);
-            await context.SaveChangesAsync();
+            using var context = DbContextFactory.CreateDbContext();
+            var asignaturaUsuario = await context.asignaturasUsuario
+                .FirstOrDefaultAsync(au => au.IdUsuario == userId && au.IdAsignatura == asignaturaId);
+
+            if (asignaturaUsuario != null)
+            {
+                context.asignaturasUsuario.Remove(asignaturaUsuario);
+                await context.SaveChangesAsync();
+                modalSuccess = true;
+                modalMessage = "Asignatura removida exitosamente";
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            modalSuccess = false;
+            modalMessage = "Error al remover la asignatura: " + ex.Message;
             StateHasChanged();
         }
     }
 
     private async Task DeleteProfesor(string id)
     {
-        using var context = DbContextFactory.CreateDbContext();
-        var profesor = await context.Users.FindAsync(id);
-
-        if (profesor != null)
+        try
         {
-            var relaciones = await context.asignaturasUsuario
-                .Where(au => au.IdUsuario == id)
-                .ToListAsync();
+            using var context = DbContextFactory.CreateDbContext();
+            var profesor = await context.Users.FindAsync(id);
 
-            context.asignaturasUsuario.RemoveRange(relaciones);
-            context.Users.Remove(profesor);
+            if (profesor != null)
+            {
+                // Eliminar relaciones
+                var relaciones = await context.asignaturasUsuario
+                    .Where(au => au.IdUsuario == id)
+                    .ToListAsync();
 
-            await context.SaveChangesAsync();
-            profesores.RemoveAll(p => p.Id == id);
-            expandedProfesores.Remove(id);
+                context.asignaturasUsuario.RemoveRange(relaciones);
+                context.Users.Remove(profesor);
+
+                await context.SaveChangesAsync();
+                profesores.RemoveAll(p => p.Id == id);
+                expandedProfesores.Remove(id);
+                
+                modalSuccess = true;
+                modalMessage = "Profesor eliminado exitosamente";
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            modalSuccess = false;
+            modalMessage = "Error al eliminar el profesor: " + ex.Message;
             StateHasChanged();
         }
     }
@@ -393,25 +350,59 @@
         showAddProfesorModal = false;
         newProfesorEmail = string.Empty;
         newProfesorPassword = string.Empty;
+        modalMessage = string.Empty;
+        modalSuccess = false;
+        isProcessing = false;
     }
 
     private async Task AddProfesor()
     {
-        var user = new ApplicationUser
+        if (string.IsNullOrWhiteSpace(newProfesorEmail) || string.IsNullOrWhiteSpace(newProfesorPassword))
+        {
+            modalMessage = "Por favor, complete todos los campos";
+            modalSuccess = false;
+            return;
+        }
+
+        isProcessing = true;
+        modalMessage = string.Empty;
+
+        try
+        {
+            var user = new ApplicationUser
             {
                 UserName = newProfesorEmail,
                 Email = newProfesorEmail,
-                EmailConfirmed = true,
+                EmailConfirmed = true
             };
 
-        var result = await UserManager.CreateAsync(user, newProfesorPassword);
+            var result = await UserManager.CreateAsync(user, newProfesorPassword);
 
-        if (result.Succeeded)
+            if (result.Succeeded)
+            {
+                await UserManager.AddToRoleAsync(user, "Profesor");
+                profesores.Add(user);
+                expandedProfesores[user.Id] = false;
+                modalSuccess = true;
+                modalMessage = "Profesor creado exitosamente";
+                await Task.Delay(1500); // Mostrar mensaje de éxito por 1.5 segundos
+                CloseAddProfesorModal();
+                StateHasChanged();
+            }
+            else
+            {
+                modalSuccess = false;
+                modalMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+        }
+        catch (Exception ex)
         {
-            await UserManager.AddToRoleAsync(user, "Profesor");
-            profesores.Add(user);
-            expandedProfesores[user.Id] = false;
-            CloseAddProfesorModal();
+            modalSuccess = false;
+            modalMessage = "Error al crear el profesor: " + ex.Message;
+        }
+        finally
+        {
+            isProcessing = false;
             StateHasChanged();
         }
     }

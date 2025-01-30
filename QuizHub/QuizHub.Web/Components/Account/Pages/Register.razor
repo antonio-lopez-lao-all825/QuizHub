@@ -114,7 +114,7 @@
     {
         if (Input.Role != "Profesor" && Input.Role != "Alumno")
         {
-            identityErrors = new[] { new IdentityError { Description = "El rol debe ser 'Profesor' o 'Alumno'." } };
+            identityErrors = new[] { new IdentityError { Description = "El rol debe ser 'Profesor' o 'Alumno'" } };
             return;
         }
 
@@ -196,24 +196,25 @@
 
     private sealed class InputModel
     {
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Email")]
+        [Required(ErrorMessage = "El correo electrónico es obligatorio")]
+        [EmailAddress(ErrorMessage = "El formato del correo electrónico no es válido")]
+        [Display(Name = "Correo electrónico")]
         public string Email { get; set; } = "";
 
-        [Required]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.")]
+        [Required(ErrorMessage = "La contraseña es obligatoria")]
+        [StringLength(100, MinimumLength = 6, 
+            ErrorMessage = "La contraseña debe tener entre {2} y {1} caracteres")]
         [DataType(DataType.Password)]
-        [Display(Name = "Password")]
+        [Display(Name = "Contraseña")]
         public string Password { get; set; } = "";
 
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Display(Name = "Confirmar contraseña")]
+        [Compare("Password", ErrorMessage = "Las contraseñas no coinciden")]
         public string ConfirmPassword { get; set; } = "";
 
         [Required(ErrorMessage = "El rol es obligatorio")]
-        [Display(Name = "Role")]
+        [Display(Name = "Rol")]
         public string Role { get; set; } = "";
     }
 }

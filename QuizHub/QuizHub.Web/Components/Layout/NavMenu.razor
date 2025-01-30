@@ -12,9 +12,13 @@
         </a>
     </div>
 
-    <div class="nav-content">
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="nav-content @(collapseNavMenu ? "collapsed" : "expanded")">
         <div class="nav-links">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="CollapseMenu">
                 <span class="bi bi-house-door-fill-nav-menu"></span> Inicio
             </NavLink>
 
@@ -25,63 +29,62 @@
                     <span class="bi bi-plus-square-fill-nav-menu"></span> Preguntas
                 </NavLink>
                 *@
-                <NavLink class="nav-link" href="Asignaturas">
+                <NavLink class="nav-link" href="Asignaturas" @onclick="CollapseMenu">
                     <span class="bi bi-book-fill-nav-menu"></span> Asignaturas
                 </NavLink>
-                <NavLink class="nav-link" href="Cuestionarios">
+                <NavLink class="nav-link" href="Cuestionarios" @onclick="CollapseMenu">
                     <span class="bi bi-file-text-fill-nav-menu"></span> Cuestionarios
                 </NavLink>
-                <NavLink class="nav-link" href="GestionAlumnos">
+                <NavLink class="nav-link" href="GestionAlumnos" @onclick="CollapseMenu">
                     <span class="bi bi-people-fill-nav-menu"></span> Administrar Alumnos
                 </NavLink>
             }
 
             @if (isAuthenticated && isAlumno)
             {
-
-                <NavLink class="nav-link" href="preguntasAlumno">
+                <NavLink class="nav-link" href="preguntasAlumno" @onclick="CollapseMenu">
                     <span class="bi bi-pencil-fill-nav-menu"></span> Cuestionarios
                 </NavLink>
-                <NavLink class="nav-link" href="cuestionariosRealizados">
+                <NavLink class="nav-link" href="cuestionariosRealizados" @onclick="CollapseMenu">
                     <span class="bi bi-trophy-fill-nav-menu"></span> Mis Calificaciones
                 </NavLink>
             }
-            @if (isAuthenticated && isAdmin){
-                <NavLink class="nav-link" href="admin/cuestionarios">
+            @if (isAuthenticated && isAdmin)
+            {
+                <NavLink class="nav-link" href="admin/cuestionarios" @onclick="CollapseMenu">
                     <span class="bi bi-pencil-fill-nav-menu"></span> Cuestionarios
                 </NavLink>
-                <NavLink class="nav-link" href="admin/profesores">
+                <NavLink class="nav-link" href="admin/profesores" @onclick="CollapseMenu">
                     <span class="bi bi-pencil-fill-nav-menu"></span> Profesores
                 </NavLink>
-                <NavLink class="nav-link" href="admin/alumnos">
+                <NavLink class="nav-link" href="admin/alumnos" @onclick="CollapseMenu">
                     <span class="bi bi-pencil-fill-nav-menu"></span> Alumnos
                 </NavLink>
             }
-
         </div>
 
         <div class="auth-section">
             <AuthorizeView>
                 <Authorized>
-                    <NavLink class="nav-link user-profile" href="Account/Manage">
+                    <div class="nav-link user-profile">
                         <span class="bi bi-person-fill-nav-menu"></span>
                         @context.User.Identity?.Name
-                    </NavLink>
+                    </div>
                     <form action="Account/Logout" method="post" class="logout-form">
                         <AntiforgeryToken />
                         <input type="hidden" name="returnUrl" value="Account/Login"/>
-                        <button type="submit" class="nav-link logout-button">
+                        <button type="submit" class="nav-link logout-button" @onclick="CollapseMenu">
                             <span class="bi bi-box-arrow-right-nav-menu"></span>
-                            Salir
+                            Cerrar sesión
                         </button>
                     </form>
                 </Authorized>
                 <NotAuthorized>
-                    <NavLink class="nav-link login-button" href="Account/Login">
+                    <NavLink class="nav-link login-button" href="Account/Login" @onclick="CollapseMenu">
                         <span class="bi bi-box-arrow-in-right-nav-menu"></span>
                         Login
                     </NavLink>
-                    <NavLink class="nav-link register-button" href="Account/Register">
+                    <NavLink class="nav-link register-button" href="Account/Register" @onclick="CollapseMenu">
                         <span class="bi bi-person-plus-nav-menu"></span>
                         Registro
                     </NavLink>
@@ -89,10 +92,6 @@
             </AuthorizeView>
         </div>
     </div>
-
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
 </nav>
 
 @code {
@@ -170,6 +169,11 @@
         // Actualizar la URL actual en cada cambio de ubicación
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
+    }
+
+    private void CollapseMenu()
+    {
+        collapseNavMenu = true;
     }
 
     private void ToggleNavMenu()
