@@ -1,0 +1,341 @@
+﻿@page "/admin/alumnos"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject UserManager<ApplicationUser> UserManager
+
+<style>
+    .admin-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        transition: transform 0.2s ease;
+    }
+
+        .admin-card:hover {
+            transform: translateY(-2px);
+        }
+
+    .card-header {
+        padding: 1.5rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+    }
+
+    .card-subtitle {
+        font-size: 0.9rem;
+        color: #718096;
+    }
+
+    .content-section {
+        padding: 1.5rem;
+        background: #f8fafc;
+    }
+
+    .list-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .admin-title {
+        font-size: 2rem;
+        font-weight: 500;
+        text-align: center;
+        margin: 2rem 0 3rem;
+        color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+</style>
+
+<div class="admin-container">
+    <h1 class="admin-title">
+        <i class="fas fa-user-graduate"></i>
+        Administración de Alumnos
+    </h1>
+
+    <button @onclick="ShowAddAlumnoModal" class="btn btn-primary btn-icon mb-4">
+        <i class="fas fa-plus"></i> Nuevo Alumno
+    </button>
+
+    @foreach (var alumno in alumnos)
+    {
+        <div class="admin-card">
+            <div class="card-header" @onclick="@(() => ToggleAlumno(alumno.Id))">
+                <div>
+                    <div class="card-title">@alumno.UserName</div>
+                    <div class="card-subtitle">@alumno.Email</div>
+                </div>
+                <i class="fas @(expandedAlumnos.ContainsKey(alumno.Id) && expandedAlumnos[alumno.Id] ? "fa-chevron-up" : "fa-chevron-down")"></i>
+            </div>
+
+            @if (expandedAlumnos.ContainsKey(alumno.Id) && expandedAlumnos[alumno.Id])
+            {
+                <div class="content-section">
+                    <h6>Historial de Cuestionarios:</h6>
+
+                    @if (GetPuntuaciones(alumno.Id).Any())
+                    {
+                        @foreach (var puntuacion in GetPuntuaciones(alumno.Id))
+                        {
+                            <div class="list-item">
+                                <span>@puntuacion.CuestionarioName (@puntuacion.AsignaturaName)</span>
+                                <span class="badge bg-secondary">@puntuacion.puntuacion Puntos</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-book-open fa-2x mb-2"></i>
+                            <div>No hay cuestionarios completados</div>
+                        </div>
+                    }
+
+                    <div class="mt-3 text-right">
+                        <button @onclick="@(() => DeleteAlumno(alumno.Id))" class="btn btn-danger btn-icon">
+                            <i class="fas fa-trash"></i> Eliminar Alumno
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (showAddAlumnoModal)
+{
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header mb-3">
+                <h3 class="card-title">Nuevo Alumno</h3>
+                <button @onclick="CloseAddAlumnoModal" class="btn btn-sm btn-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label>Correo electrónico</label>
+                <input @bind="newAlumnoEmail" class="form-control mb-2" />
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input @bind="newAlumnoPassword" type="password" class="form-control" />
+            </div>
+            <div class="mt-4 text-right">
+                <button @onclick="AddAlumno" class="btn btn-primary btn-icon">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+                <button @onclick="CloseAddAlumnoModal" class="btn btn-secondary btn-icon ml-2">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ApplicationUser> alumnos = new List<ApplicationUser>();
+    private List<Asignatura> asignaturas = new List<Asignatura>();
+    private Dictionary<string, bool> expandedAlumnos = new Dictionary<string, bool>();
+    private int selectedAsignaturaId = 0;
+    private bool showAddAlumnoModal = false;
+    private string newAlumnoEmail = string.Empty;
+    private string newAlumnoPassword = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbContextFactory.CreateDbContext();
+
+        // Cargar alumnos (usuarios con rol "Alumno")
+        var role = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Alumno");
+        if (role != null)
+        {
+            var userRoles = await context.UserRoles
+                .Where(ur => ur.RoleId == role.Id)
+                .ToListAsync();
+
+            var userIds = userRoles.Select(ur => ur.UserId).ToList();
+            alumnos = await context.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            foreach (var alumno in alumnos)
+            {
+                expandedAlumnos[alumno.Id] = false;
+            }
+        }
+
+        asignaturas = await context.asignaturas.ToListAsync();
+    }
+
+    private List<Asignatura> GetAsignaturasAlumno(string userId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        return context.asignaturasUsuario
+            .Where(au => au.IdUsuario == userId)
+            .Join(context.asignaturas,
+                au => au.IdAsignatura,
+                a => a.Id,
+                (au, a) => a)
+            .ToList();
+    }
+
+    private List<PuntuacionInfo> GetPuntuaciones(string userId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        return context.puntuacion
+            .Where(p => p.IdUsuario == userId)
+            .Join(context.cuestionarios,
+                p => p.IdCuestionario,
+                c => c.Id,
+                (p, c) => new { p, c })
+            .Join(context.asignaturas,
+                pc => pc.c.Asignatura,
+                a => a.Name,
+                (pc, a) => new PuntuacionInfo
+                    {
+                        CuestionarioName = pc.c.Name,
+                        AsignaturaName = a.Name,
+                        puntuacion = pc.p.puntuacion
+                    })
+            .ToList();
+    }
+
+    private async Task AssignAsignatura(string userId)
+    {
+        if (selectedAsignaturaId > 0)
+        {
+            using var context = DbContextFactory.CreateDbContext();
+
+            var exists = await context.asignaturasUsuario
+                .AnyAsync(au => au.IdUsuario == userId && au.IdAsignatura == selectedAsignaturaId);
+
+            if (!exists)
+            {
+                context.asignaturasUsuario.Add(new AsignaturasUsuario
+                    {
+                        IdUsuario = userId,
+                        IdAsignatura = selectedAsignaturaId
+                    });
+
+                await context.SaveChangesAsync();
+                selectedAsignaturaId = 0;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task RemoveAsignatura(string userId, int asignaturaId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        var asignaturaUsuario = await context.asignaturasUsuario
+            .FirstOrDefaultAsync(au => au.IdUsuario == userId && au.IdAsignatura == asignaturaId);
+
+        if (asignaturaUsuario != null)
+        {
+            context.asignaturasUsuario.Remove(asignaturaUsuario);
+            await context.SaveChangesAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteAlumno(string id)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        var alumno = await context.Users.FindAsync(id);
+
+        if (alumno != null)
+        {
+            // Eliminar relaciones
+            var relaciones = await context.asignaturasUsuario
+                .Where(au => au.IdUsuario == id)
+                .ToListAsync();
+
+            var puntuaciones = await context.puntuacion
+                .Where(p => p.IdUsuario == id)
+                .ToListAsync();
+
+            context.asignaturasUsuario.RemoveRange(relaciones);
+            context.puntuacion.RemoveRange(puntuaciones);
+            context.Users.Remove(alumno);
+
+            await context.SaveChangesAsync();
+            alumnos.RemoveAll(a => a.Id == id);
+            expandedAlumnos.Remove(id);
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleAlumno(string alumnoId)
+    {
+        if (expandedAlumnos.ContainsKey(alumnoId))
+        {
+            expandedAlumnos[alumnoId] = !expandedAlumnos[alumnoId];
+            StateHasChanged();
+        }
+    }
+
+    private void ShowAddAlumnoModal() => showAddAlumnoModal = true;
+
+    private void CloseAddAlumnoModal()
+    {
+        showAddAlumnoModal = false;
+        newAlumnoEmail = string.Empty;
+        newAlumnoPassword = string.Empty;
+    }
+
+    private async Task AddAlumno()
+    {
+        var user = new ApplicationUser
+            {
+                UserName = newAlumnoEmail,
+                Email = newAlumnoEmail,
+                EmailConfirmed = true
+            };
+
+        var result = await UserManager.CreateAsync(user, newAlumnoPassword);
+
+        if (result.Succeeded)
+        {
+            await UserManager.AddToRoleAsync(user, "Alumno");
+            alumnos.Add(user);
+            expandedAlumnos[user.Id] = false;
+            CloseAddAlumnoModal();
+            StateHasChanged();
+        }
+    }
+
+    private class PuntuacionInfo
+    {
+        public string CuestionarioName { get; set; }
+        public string AsignaturaName { get; set; }
+        public int puntuacion { get; set; }
+    }
+}

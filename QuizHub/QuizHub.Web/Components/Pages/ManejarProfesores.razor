@@ -1,0 +1,179 @@
+﻿@page "/AdministrarProfesores"
+@using Microsoft.AspNetCore.Identity
+@inject ApplicationDbContext db
+@inject IJSRuntime JSRuntime
+@inject UserManager<ApplicationUser> UserManager
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Administrar Profesores</PageTitle>
+
+<div class="row">
+    <div class="col-10">
+        <h1>Administrar Profesores</h1>
+    </div>
+</div>
+
+@if (profesores == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (!profesores.Any())
+{
+    <p>No se encontraron profesores.</p>
+}
+else
+{
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th>Nombre de Usuario</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var profesor in profesores)
+            {
+                <tr>
+                    <td>@profesor.UserName</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" @onclick="() => AbrirModalEdicion(profesor)">Editar</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarProfesor(profesor.Id)">Eliminar</button>
+                        <button class="btn btn-secondary btn-sm" @onclick="() => AdministrarAsignaturas(profesor.Id)">Asignar Asignaturas</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="modal fade" id="editProfesorModal" tabindex="-1" aria-labelledby="editProfesorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editProfesorModalLabel">Editar Profesor</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="profesorEditado" OnValidSubmit="ActualizarProfesor">
+                    <DataAnnotationsValidator />
+                    <div class="mb-3">
+                        <label>Nombre de Usuario:</label>
+                        <InputText @bind-Value="profesorEditado.UserName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label>Email:</label>
+                        <InputText @bind-Value="profesorEditado.Email" type="email" class="form-control" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Actualizar Profesor</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ApplicationUser> profesores = new();
+    private ApplicationUser profesorEditado = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Obtener todos los usuarios
+        var todosUsuarios = await UserManager.Users.AsNoTracking().ToListAsync();
+
+        // Obtener roles de cada usuario
+        var usuariosProfesores = new List<ApplicationUser>();
+        foreach (var usuario in todosUsuarios)
+        {
+            var roles = await UserManager.GetRolesAsync(usuario);
+
+            // Filtrar solo los usuarios con el rol "profesor"
+            if (roles.Contains("profesor", StringComparer.OrdinalIgnoreCase))
+            {
+                usuariosProfesores.Add(usuario);
+            }
+        }
+
+        profesores = usuariosProfesores;
+    }
+
+    private async Task EliminarProfesor(string id)
+    {
+        var profesor = await UserManager.FindByIdAsync(id);
+        if (profesor != null)
+        {
+            var result = await UserManager.DeleteAsync(profesor);
+            if (result.Succeeded)
+            {
+                // Filtrar los usuarios otra vez después de eliminarlos
+                var usuariosActualizados = await UserManager.Users.AsNoTracking().ToListAsync();
+                var usuariosProfesores = new List<ApplicationUser>();
+
+                // Obtener roles para cada usuario y filtrar por profesor
+                foreach (var u in usuariosActualizados)
+                {
+                    var roles = await UserManager.GetRolesAsync(u);
+                    if (roles.Contains("profesor", StringComparer.OrdinalIgnoreCase))
+                    {
+                        usuariosProfesores.Add(u);
+                    }
+                }
+
+                profesores = usuariosProfesores;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void AbrirModalEdicion(ApplicationUser profesor)
+    {
+        profesorEditado = new ApplicationUser
+            {
+                Id = profesor.Id,
+                UserName = profesor.UserName,
+                Email = profesor.Email
+            };
+        StateHasChanged();
+
+        JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('editProfesorModal')).show();");
+    }
+
+    private async Task ActualizarProfesor()
+    {
+        var profesorExistente = await UserManager.FindByIdAsync(profesorEditado.Id);
+        if (profesorExistente != null)
+        {
+            // Actualizar los datos del profesor
+            profesorExistente.UserName = profesorEditado.UserName;
+            profesorExistente.Email = profesorEditado.Email;
+
+            var result = await UserManager.UpdateAsync(profesorExistente);
+            if (result.Succeeded)
+            {
+                // Filtrar solo los usuarios con el rol profesor
+                var usuariosActualizados = await UserManager.Users.AsNoTracking().ToListAsync();
+                var usuariosProfesores = new List<ApplicationUser>();
+
+                // Obtener roles para cada usuario y filtrar por profesor
+                foreach (var u in usuariosActualizados)
+                {
+                    var roles = await UserManager.GetRolesAsync(u);
+                    if (roles.Contains("profesor", StringComparer.OrdinalIgnoreCase))
+                    {
+                        usuariosProfesores.Add(u);
+                    }
+                }
+
+                profesores = usuariosProfesores;
+                profesorEditado = new();
+                StateHasChanged();
+
+                await JSRuntime.InvokeVoidAsync("eval", @"new bootstrap.Modal(document.getElementById('editProfesorModal')).hide();");
+            }
+        }
+    }
+
+    private void AdministrarAsignaturas(string id)
+    {
+        // Redirigir a una página para asignar/quitar asignaturas
+    }
+}
