@@ -131,6 +131,10 @@
             return;
         }
 
+        // Marcar el email como confirmado
+        user.EmailConfirmed = true;
+        await UserManager.UpdateAsync(user); // Guardar el cambio en la base de datos
+
         // Crear el rol si no existe y asignarlo
         if (!await RoleManager.RoleExistsAsync(Input.Role))
         {
@@ -150,7 +154,7 @@
         }
 
         // Confirmar registro y redirigir
-        var userId = await UserManager.GetUserIdAsync(user);
+      /*  var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
@@ -163,7 +167,7 @@
         {
             RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
             return;
-        }
+        }*/
 
         await SignInManager.SignInAsync(user, isPersistent: false);
         NavigationManager.NavigateTo("/");

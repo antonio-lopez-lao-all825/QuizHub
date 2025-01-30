@@ -28,8 +28,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseMySQL(connectionString), ServiceLifetime.Scoped);
 
-builder.Services.AddScoped<ApplicationDbContext>(p => 
-    p.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false; // Desactivar la confirmación de cuenta
+});
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

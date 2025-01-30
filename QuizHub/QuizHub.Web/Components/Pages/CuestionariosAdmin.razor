@@ -1,0 +1,345 @@
+﻿@page "/admin/cuestionarios"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+
+<style>
+    .cuestionario-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .cuestionario-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .cuestionario-header {
+        padding: 1.5rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+    }
+
+    .cuestionario-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .metadata-section {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+
+    .metadata-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #4a5568;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        margin-top: 1rem;
+    }
+
+    .stat-box {
+        text-align: center;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: #718096;
+        margin-top: 0.25rem;
+    }
+
+    .progress-container {
+        padding: 1.5rem;
+        background: #f8fafc;
+    }
+
+    .progress-bar {
+        height: 10px;
+        background: #e2e8f0;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: #48bb78;
+        transition: width 0.5s ease;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #a0aec0;
+        font-style: italic;
+    }
+
+    .asignatura-tag {
+        background: #4a5568;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        display: inline-block;
+        margin-top: 0.5rem;
+    }
+
+    .admin-title {
+        font-size: 2rem;
+        font-weight: 500; /* Reducido para hacerlo más fino */
+        text-align: center;
+        margin: 2rem 0 3rem;
+        color: #000; /* Negro */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+</style>
+
+<div class="cuestionario-container">
+    <h3 class="admin-title">
+        <i class="fas fa-clipboard-list"></i>
+        Administración de Cuestionarios
+    </h3>
+
+    @foreach (var cuestionario in cuestionarios)
+    {
+        <div class="cuestionario-card">
+            <div class="cuestionario-header" @onclick="@(() => ToggleCuestionario(cuestionario.Id))">
+                <div>
+                    <div class="cuestionario-title">@cuestionario.Name</div>
+                    <div class="metadata-section">
+                        <div class="metadata-item">
+                            <i class="fas fa-book"></i>
+                            <span class="asignatura-tag">
+                                @(GetNombreAsignatura(cuestionario.Asignatura) ?? "Sin asignatura")
+                            </span>
+                        </div>
+                        <div class="metadata-item">
+                            <i class="fas fa-user-tie"></i>
+                            @(GetProfesorName(cuestionario.IdUsuario) ?? "Profesor no encontrado")
+                        </div>
+                        <div class="metadata-item">
+                            <i class="fas fa-users"></i>
+                            @GetTotalAlumnos(cuestionario.Id) alumnos
+                        </div>
+                    </div>
+                </div>
+                <i class="fas @(expandedCuestionarios.ContainsKey(cuestionario.Id) && expandedCuestionarios[cuestionario.Id] ? "fa-chevron-up" : "fa-chevron-down")"></i>
+            </div>
+
+            @if (expandedCuestionarios.ContainsKey(cuestionario.Id) && expandedCuestionarios[cuestionario.Id])
+            {
+                <div class="cuestionario-details">
+                    @if (HasResultados(cuestionario.Id))
+                    {
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-value">@GetPromedio(cuestionario.Id)</div>
+                                <div class="stat-label">Promedio</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">@GetMaxima(cuestionario.Id)</div>
+                                <div class="stat-label">Máxima</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">@GetMinima(cuestionario.Id)</div>
+                                <div class="stat-label">Mínima</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">@GetModa(cuestionario.Id)</div>
+                                <div class="stat-label">Moda</div>
+                            </div>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="flex justify-between mb-2">
+                                <span>Aprobados: @GetAprobados(cuestionario.Id)</span>
+                                <span>@GetPorcentajeAprobados(cuestionario.Id)%</span>
+                                <span>Reprobados: @GetReprobados(cuestionario.Id)</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: @(GetPorcentajeAprobados(cuestionario.Id))%"></div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                            <div>Ningún alumno ha realizado este cuestionario</div>
+                        </div>
+                    }
+
+                    <div class="text-right p-3">
+                        <button @onclick="@(() => DeleteCuestionario(cuestionario.Id))"
+                                class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash mr-2"></i>
+                            Eliminar Cuestionario
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Cuestionario> cuestionarios = new List<Cuestionario>();
+    private Dictionary<int, bool> expandedCuestionarios = new Dictionary<int, bool>();
+    private List<ApplicationUser> profesores = new List<ApplicationUser>();
+    private List<Asignatura> asignaturas = new List<Asignatura>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        cuestionarios = await context.cuestionarios.ToListAsync();
+        profesores = await context.Users.ToListAsync();
+        asignaturas = await context.asignaturas.ToListAsync();
+
+        foreach (var c in cuestionarios)
+        {
+            expandedCuestionarios[c.Id] = false;
+        }
+    }
+
+    private string GetProfesorName(string userId)
+    {
+        return profesores.FirstOrDefault(p => p.Id == userId)?.UserName;
+    }
+
+    private string GetNombreAsignatura(string nombreAsignatura)
+    {
+        return asignaturas.FirstOrDefault(a => a.Name == nombreAsignatura)?.Name;
+    }
+
+    private int GetTotalAlumnos(int cuestionarioId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        return context.puntuacion.Count(p => p.IdCuestionario == cuestionarioId);
+    }
+
+    private double GetPromedio(int cuestionarioId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        return context.puntuacion
+            .Where(p => p.IdCuestionario == cuestionarioId)
+            .Average(p => (double?)p.puntuacion) ?? 0.0;
+    }
+
+    private int GetMaxima(int cuestionarioId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        return context.puntuacion
+            .Where(p => p.IdCuestionario == cuestionarioId)
+            .Max(p => (int?)p.puntuacion) ?? 0;
+    }
+
+    private int GetMinima(int cuestionarioId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        return context.puntuacion
+            .Where(p => p.IdCuestionario == cuestionarioId)
+            .Min(p => (int?)p.puntuacion) ?? 0;
+    }
+
+    private int GetModa(int cuestionarioId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        return context.puntuacion
+            .Where(p => p.IdCuestionario == cuestionarioId)
+            .GroupBy(p => p.puntuacion)
+            .OrderByDescending(g => g.Count())
+            .Select(g => g.Key)
+            .FirstOrDefault();
+    }
+
+    private int GetAprobados(int cuestionarioId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        return context.puntuacion
+            .Count(p => p.IdCuestionario == cuestionarioId && p.puntuacion >= 5);
+    }
+
+    private int GetReprobados(int cuestionarioId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        return context.puntuacion
+            .Count(p => p.IdCuestionario == cuestionarioId && p.puntuacion < 5);
+    }
+
+    private double GetPorcentajeAprobados(int cuestionarioId)
+    {
+        var total = GetTotalAlumnos(cuestionarioId);
+        if (total == 0) return 0;
+        return Math.Round((GetAprobados(cuestionarioId) * 100.0) / total, 1);
+    }
+
+    private bool HasResultados(int cuestionarioId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        return context.puntuacion.Any(p => p.IdCuestionario == cuestionarioId);
+    }
+
+    private void ToggleCuestionario(int cuestionarioId)
+    {
+        expandedCuestionarios[cuestionarioId] = !expandedCuestionarios[cuestionarioId];
+        StateHasChanged();
+    }
+
+    private async Task DeleteCuestionario(int cuestionarioId)
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        var cuestionario = await context.cuestionarios.FindAsync(cuestionarioId);
+
+        if (cuestionario != null)
+        {
+            var relaciones = await context.preguntasCuestionario
+                .Where(pc => pc.IdCuestionario == cuestionarioId)
+                .ToListAsync();
+
+            var puntuaciones = await context.puntuacion
+                .Where(p => p.IdCuestionario == cuestionarioId)
+                .ToListAsync();
+
+            context.preguntasCuestionario.RemoveRange(relaciones);
+            context.puntuacion.RemoveRange(puntuaciones);
+            context.cuestionarios.Remove(cuestionario);
+
+            await context.SaveChangesAsync();
+            cuestionarios.Remove(cuestionario);
+            StateHasChanged();
+        }
+    }
+}

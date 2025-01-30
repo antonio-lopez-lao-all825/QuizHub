@@ -38,6 +38,7 @@
 
             @if (isAuthenticated && isAlumno)
             {
+
                 <NavLink class="nav-link" href="preguntasAlumno">
                     <span class="bi bi-pencil-fill-nav-menu"></span> Cuestionarios
                 </NavLink>
@@ -45,6 +46,18 @@
                     <span class="bi bi-trophy-fill-nav-menu"></span> Mis Calificaciones
                 </NavLink>
             }
+            @if (isAuthenticated && isAdmin){
+                <NavLink class="nav-link" href="admin/cuestionarios">
+                    <span class="bi bi-pencil-fill-nav-menu"></span> Alumnos
+                </NavLink>
+                <NavLink class="nav-link" href="admin/profesores">
+                    <span class="bi bi-pencil-fill-nav-menu"></span> Profesores
+                </NavLink>
+                <NavLink class="nav-link" href="admin/alumnos">
+                    <span class="bi bi-pencil-fill-nav-menu"></span> Cuestionarios
+                </NavLink>
+            }
+
         </div>
 
         <div class="auth-section">
@@ -87,6 +100,8 @@
     private bool isAuthenticated = false;
     private bool isProfesor = false;
     private bool isAlumno = false;
+    private bool isAdmin = false;
+
     private bool collapseNavMenu = true;
 
     protected override async Task OnInitializedAsync()
@@ -116,9 +131,11 @@
                 // Verificar si el usuario tiene el rol de "profesor" (ignorar mayúsculas y minúsculas)
                 isProfesor = roles.Contains("profesor", StringComparer.OrdinalIgnoreCase);
                 isAlumno = roles.Contains("alumno", StringComparer.OrdinalIgnoreCase);
+                isAdmin = roles.Contains("admin", StringComparer.OrdinalIgnoreCase);
 
                 Console.WriteLine($"Is Profesor: {isProfesor}");
                 Console.WriteLine($"Is Alumno: {isAlumno}");
+				Console.WriteLine($"Is Admin: {isAdmin}");
             }
             else
             {
@@ -135,6 +152,7 @@
         {
             isProfesor = false;
             isAlumno = false;
+            isAdmin = false;
         }
 
         // Determinar la URL de navegación para saber cuál está activa
